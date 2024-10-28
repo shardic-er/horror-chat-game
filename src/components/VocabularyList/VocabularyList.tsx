@@ -3,7 +3,12 @@ import { useAppSelector } from '../../store/hooks';
 import { Form, Badge, Card } from 'react-bootstrap';
 import './VocabularyList.styles.css';
 
-const VocabularyList: React.FC = () => {
+interface VocabularyListProps {
+    onWordSelect: (word: string) => void;
+    isInputFull?: boolean;
+}
+
+const VocabularyList: React.FC<VocabularyListProps> = ({ onWordSelect, isInputFull = false }) => {
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -12,10 +17,6 @@ const VocabularyList: React.FC = () => {
             word.toLowerCase().includes(searchTerm.toLowerCase())
         ).sort();
     }, [knownWords, searchTerm]);
-
-    const handleWordClick = (word: string) => {
-        alert(`Selected word: ${word}`);
-    };
 
     return (
         <Card bg="dark" text="light" className="vocabulary-card">
@@ -35,8 +36,10 @@ const VocabularyList: React.FC = () => {
                             <Badge
                                 key={index}
                                 bg="secondary"
-                                className="word-badge"
-                                onClick={() => handleWordClick(word)}
+                                className={`vocabulary-badge ${isInputFull ? 'disabled' : ''}`}
+                                onClick={() => !isInputFull && onWordSelect(word)}
+                                role="button"
+                                aria-disabled={isInputFull}
                             >
                                 {word}
                             </Badge>

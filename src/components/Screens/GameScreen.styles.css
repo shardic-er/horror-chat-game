@@ -1,18 +1,25 @@
 .game-screen-container {
-    min-height: 100vh;
+    height: 100vh;
     padding: 1rem;
-    background-color: var(--bs-dark);
+    padding-bottom: 0;
+    background-color: var(--game-dark);
+    display: flex;
+    flex-direction: column;
 }
 
 .chat-area {
-    height: 100vh;
+    height: 100%;
     padding-right: 1rem;
+    display: flex;
+    flex-direction: column;
 }
 
-.chat-container {
-    background-color: var(--bs-dark);
-    height: 100%;
+.chat-messages-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: var(--game-dark);
     border-radius: 0.375rem;
-    border: 1px solid var(--bs-secondary);
+    border: 1px solid var(--game-border);
     padding: 1rem;
+    margin-bottom: 1rem;
 }

@@ -1,14 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface VocabularyState {
-    // Using Set for O(1) lookups, but we'll serialize to/from array for Redux
     knownWords: string[];
-    tokenLimit: number;
+    wordLimit: number;
 }
+
+const calculateWordLimit = (vocabularySize: number): number => {
+    return Math.floor(Math.sqrt(vocabularySize));
+};
 
 const initialState: VocabularyState = {
     knownWords: ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'],
-    tokenLimit: 10,
+    wordLimit: calculateWordLimit(10), // Initial limit based on starting vocabulary
 };
 
 const vocabularySlice = createSlice({
@@ -18,13 +21,12 @@ const vocabularySlice = createSlice({
         addWord: (state, action: PayloadAction<string>) => {
             if (!state.knownWords.includes(action.payload)) {
                 state.knownWords.push(action.payload);
+                // Update word limit whenever vocabulary grows
+                state.wordLimit = calculateWordLimit(state.knownWords.length);
             }
-        },
-        incrementTokenLimit: (state) => {
-            state.tokenLimit += 1;
         },
     },
 });
 
-export const { addWord, incrementTokenLimit } = vocabularySlice.actions;
+export const { addWord } = vocabularySlice.actions;
 export default vocabularySlice.reducer;
