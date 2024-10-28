@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 .idea
+key.txt
 
 # testing
 /coverage
@@ -22,3 +23,5 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/key.txt
+/project_structure.txt

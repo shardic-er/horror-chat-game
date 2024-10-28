@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import MenuScreen from './components/Screens/MenuScreen';
 import GameScreen from './components/Screens/GameScreen';
-import { useAppSelector, useAppDispatch } from './store/hooks';
-import { ScreenType } from './types/gameTypes';
+import { RootState } from './store/store';
 import { setScreen } from './store/navigationSlice';
+import { ScreenType } from './types/gameTypes';
+import { getApiKey } from './services/apiKeyService';
 
 const App: React.FC = () => {
-  const currentScreen = useAppSelector((state) => state.navigation.currentScreen);
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
+  const currentScreen = useSelector((state: RootState) => state.navigation.currentScreen);
+
+  // Reset to menu on fresh load/refresh
+  useEffect(() => {
+    const apiKey = getApiKey();
+    // Even if we have an API key, start at menu
+    dispatch(setScreen(ScreenType.MENU));
+  }, [dispatch]);
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -20,7 +29,11 @@ const App: React.FC = () => {
       case ScreenType.CHAT:
         return <GameScreen />;
       default:
-        return <div>Screen not implemented yet</div>;
+        return (
+            <MenuScreen
+                onStartChat={() => dispatch(setScreen(ScreenType.CHAT))}
+            />
+        );
     }
   };
 
