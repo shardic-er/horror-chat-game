@@ -1,26 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import MenuScreen from './components/Screens/MenuScreen';
+import GameScreen from './components/Screens/GameScreen';
+import { useAppSelector, useAppDispatch } from './store/hooks';
+import { ScreenType } from './types/gameTypes';
+import { setScreen } from './store/navigationSlice';
 
-function App() {
+const App: React.FC = () => {
+  const currentScreen = useAppSelector((state) => state.navigation.currentScreen);
+  const dispatch = useAppDispatch();
+
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case ScreenType.MENU:
+        return (
+            <MenuScreen
+                onStartChat={() => dispatch(setScreen(ScreenType.CHAT))}
+            />
+        );
+      case ScreenType.CHAT:
+        return <GameScreen />;
+      default:
+        return <div>Screen not implemented yet</div>;
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        {renderScreen()}
+      </div>
   );
-}
+};
 
 export default App;
