@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useAppSelector } from '../../store/hooks';
+import { ListGroup, Form, Badge, Card } from 'react-bootstrap';
 
 const VocabularyList: React.FC = () => {
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
@@ -17,31 +18,46 @@ const VocabularyList: React.FC = () => {
     };
 
     return (
-        <div className="bg-gray-800 rounded-lg p-4 max-w-md">
-            <div className="mb-4">
-                <input
+        <Card bg="dark" text="light">
+            <Card.Header>
+                <Form.Control
                     type="text"
                     placeholder="Search vocabulary..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-gray-700 text-white px-3 py-2 rounded"
+                    className="bg-dark text-light"
                 />
-            </div>
-
-            <div className="h-48 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-2">
+            </Card.Header>
+            <Card.Body className="p-0">
+                <ListGroup
+                    variant="flush"
+                    style={{
+                        maxHeight: '400px',
+                        overflowY: 'auto',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#666 #333'
+                    }}
+                >
                     {filteredWords.map((word, index) => (
-                        <button
+                        <ListGroup.Item
                             key={index}
+                            action
+                            variant="dark"
+                            className="d-flex justify-content-between align-items-center border-bottom border-secondary"
                             onClick={() => handleWordClick(word)}
-                            className="text-left px-2 py-1 hover:bg-gray-700 rounded transition-colors"
                         >
-                            {word}
-                        </button>
+                            <Badge
+                                bg="secondary"
+                                className="text-light px-2 py-1 w-100 text-start"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {word}
+                            </Badge>
+                        </ListGroup.Item>
                     ))}
-                </div>
-            </div>
-        </div>
+                </ListGroup>
+            </Card.Body>
+        </Card>
     );
 };
 
