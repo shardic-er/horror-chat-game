@@ -1,0 +1,27 @@
+:root {
+    --game-dark: #212529;
+    --game-darker: #1a1d20;
+    --game-border: #495057;
+    --game-text: #f8f9fa;
+    --game-hover: #2c3034;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--game-dark);
+    color: var(--game-text);
+}
+
+.full-height {
+    height: 100vh;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}

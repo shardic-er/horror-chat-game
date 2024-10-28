@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAppSelector } from '../../store/hooks';
-import { ListGroup, Form, Badge, Card } from 'react-bootstrap';
+import { Form, Badge, Card } from 'react-bootstrap';
+import './VocabularyList.styles.css';
 
 const VocabularyList: React.FC = () => {
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
@@ -14,48 +15,34 @@ const VocabularyList: React.FC = () => {
 
     const handleWordClick = (word: string) => {
         alert(`Selected word: ${word}`);
-        // This will be connected to the chat input later
     };
 
     return (
-        <Card bg="dark" text="light">
-            <Card.Header>
+        <Card bg="dark" text="light" className="vocabulary-card">
+            <Card.Header className="bg-dark border-bottom border-secondary">
                 <Form.Control
                     type="text"
                     placeholder="Search vocabulary..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-dark text-light"
+                    className="search-input"
                 />
             </Card.Header>
             <Card.Body className="p-0">
-                <ListGroup
-                    variant="flush"
-                    style={{
-                        maxHeight: '400px',
-                        overflowY: 'auto',
-                        scrollbarWidth: 'thin',
-                        scrollbarColor: '#666 #333'
-                    }}
-                >
-                    {filteredWords.map((word, index) => (
-                        <ListGroup.Item
-                            key={index}
-                            action
-                            variant="dark"
-                            className="d-flex justify-content-between align-items-center border-bottom border-secondary"
-                            onClick={() => handleWordClick(word)}
-                        >
+                <div className="vocabulary-container">
+                    <div className="word-cloud">
+                        {filteredWords.map((word, index) => (
                             <Badge
+                                key={index}
                                 bg="secondary"
-                                className="text-light px-2 py-1 w-100 text-start"
-                                style={{ cursor: 'pointer' }}
+                                className="word-badge"
+                                onClick={() => handleWordClick(word)}
                             >
                                 {word}
                             </Badge>
-                        </ListGroup.Item>
-                    ))}
-                </ListGroup>
+                        ))}
+                    </div>
+                </div>
             </Card.Body>
         </Card>
     );

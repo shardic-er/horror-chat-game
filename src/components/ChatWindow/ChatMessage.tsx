@@ -2,11 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { addWord, incrementTokenLimit } from '../../store/vocabularySlice';
 
-interface ChatMessageProps {
-    content: string;
-}
-
-const ChatMessage: React.FC<ChatMessageProps> = ({ content }) => {
+const ChatMessage: React.FC<{ content: string }> = ({ content }) => {
     const dispatch = useAppDispatch();
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
     const wordSet = new Set(knownWords);
@@ -43,11 +39,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content }) => {
     };
 
     return (
-        <div className="p-4 bg-gray-800 rounded-lg leading-relaxed">
+        <div className="message-container text-light">
             {redactionStates.map((wordState, index) => {
                 if (!wordState.isRedacted) {
                     return (
-                        <span key={index} className="inline-block mx-2 my-1">
+                        <span key={index} className="d-inline-block mx-1 my-1">
               {words[index]}
             </span>
                     );
@@ -55,12 +51,20 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content }) => {
 
                 const isActive = activeRedaction === index;
                 return (
-                    <span key={index} className="inline-block mx-2 my-1 relative">
+                    <span key={index} className="d-inline-block mx-1 my-1">
             {isActive ? (
                 <input
                     ref={el => inputRefs.current[index] = el}
-                    className="bg-gray-700 text-white px-2 py-1 rounded"
-                    style={{ width: `${Math.max(words[index].length * 0.75, 2)}em` }}
+                    className="redaction-input"
+                    style={{
+                        width: `${Math.max(words[index].length * 0.8, 2)}em`,
+                        background: '#2c3034',
+                        border: '1px solid #495057',
+                        color: '#fff',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        outline: 'none'
+                    }}
                     onBlur={() => setActiveRedaction(null)}
                     onKeyDown={e => {
                         if (e.key === 'Enter') {
@@ -72,7 +76,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content }) => {
             ) : (
                 <button
                     onClick={() => handleRedactionClick(index)}
-                    className="bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded"
+                    className="redaction-box"
+                    style={{
+                        background: '#2c3034',
+                        border: '1px solid #495057',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        minWidth: '1.5em',
+                        fontFamily: 'monospace'
+                    }}
                 >
                     {'█'.repeat(words[index].length)}
                 </button>
@@ -80,6 +94,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content }) => {
           </span>
                 );
             })}
+            <style>
+                {`
+          .redaction-box:hover {
+            background: #373b3e !important;
+            border-color: #6c757d !important;
+          }
+          
+          .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+          }
+          
+          @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }
+            40%, 60% { transform: translate3d(2px, 0, 0); }
+          }
+        `}
+            </style>
         </div>
     );
 };

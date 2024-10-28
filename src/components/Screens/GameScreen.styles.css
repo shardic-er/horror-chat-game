@@ -1,0 +1,18 @@
+.game-screen-container {
+    min-height: 100vh;
+    padding: 1rem;
+    background-color: var(--bs-dark);
+}
+
+.chat-area {
+    height: 100vh;
+    padding-right: 1rem;
+}
+
+.chat-container {
+    background-color: var(--bs-dark);
+    height: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid var(--bs-secondary);
+    padding: 1rem;
+}
