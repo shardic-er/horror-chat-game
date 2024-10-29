@@ -1,0 +1,38 @@
+:root {
+    /* Colors */
+    --primary: #0d6efd;
+    --secondary: #6c757d;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #0dcaf0;
+
+    /* Game-specific colors (moved from shared.css) */
+    --game-dark: #212529;
+    --game-darker: #1a1d20;
+    --game-border: #495057;
+    --game-text: #f8f9fa;
+    --game-hover: #2c3034;
+
+    /* Typography */
+    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    --font-monospace: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Animations */
+    --animation-fast: 200ms;
+    --animation-normal: 300ms;
+    --animation-slow: 500ms;
+
+    /* Z-indices */
+    --z-modal: 1000;
+    --z-overlay: 900;
+    --z-dropdown: 800;
+    --z-header: 700;
+}

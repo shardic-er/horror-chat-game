@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import { Form, Badge, Card } from 'react-bootstrap';
 import './VocabularyList.styles.css';
 

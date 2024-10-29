@@ -1,15 +1,15 @@
-// src/store/navigationSlice.ts
+// src/store/slices/navigationSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppDispatch } from './store';
-import { ScreenType, DisplayMode } from '../types/gameTypes';
+import { AppDispatch } from '../../types/store.types';
+import { ScreenType, DisplayMode } from '../../types/gameTypes';
 
-interface NavigationState {
+export interface NavigationSlice {
     currentScreen: ScreenType;
     displayMode: DisplayMode;
 }
 
-const initialState: NavigationState = {
+const initialState: NavigationSlice = {
     currentScreen: ScreenType.MENU,
     displayMode: 'reading'
 };
@@ -37,7 +37,6 @@ export const {
     resetNavigation
 } = navigationSlice.actions;
 
-// Properly typed thunk action
 export const forceNavigationReset = () => {
     return async (dispatch: AppDispatch) => {
         localStorage.removeItem('navigation');

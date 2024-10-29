@@ -1,8 +1,8 @@
 // src/components/RedactedWord/RedactedWord.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useAppDispatch } from '../../store/hooks';
-import { addNewWord } from '../../store/vocabularySlice';
+import { useAppDispatch } from '../../../store/hooks';
+import { addNewWord } from '../../../store/slices/vocabularySlice';
 import './RedactedWord.styles.css';
 
 interface RedactedWordProps {

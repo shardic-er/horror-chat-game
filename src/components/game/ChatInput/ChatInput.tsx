@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Card, Badge, Spinner } from 'react-bootstrap';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { sendChatMessage } from '../../store/gameSlice';
+import { useAppSelector, useAppDispatch } from '../../../store/hooks';
+import { sendChatMessage } from '../../../store/slices/gameSlice';
 import './ChatInput.styles.css';
 
 interface ChatInputProps {

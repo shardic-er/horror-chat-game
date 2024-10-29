@@ -2,16 +2,16 @@
 
 import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import VocabularyList from '../VocabularyList/VocabularyList';
-import PageNavigation from '../PageNavigation/PageNavigation';
-import GameMenu from '../GameMenu/GameMenu';
-import { DisplayMode, GameContent, PaginatedContent } from '../../types/gameTypes';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { setDisplayMode } from '../../store/navigationSlice';
+import VocabularyList from '../../game/VocabularyList/VocabularyList';
+import PageNavigation from '../../game/PageNavigation/PageNavigation';
+import GameMenu from '../../game/GameMenu/GameMenu';
+import { DisplayMode, PaginatedContent } from '../../../types/gameTypes';
+import { useAppSelector, useAppDispatch } from '../../../store/hooks';
+import { setDisplayMode } from '../../../store/slices/navigationSlice';
 import './GameScreen.styles.css';
-import ChatMessage from "../ChatWindow/ChatMessage";
-import ChatWindow from "../ChatWindow/ChatWindow";
-import ChatInput from "../ChatInput/ChatInput";
+import ChatMessage from "../../game/ChatWindow/ChatMessage";
+import ChatWindow from "../../game/ChatWindow/ChatWindow";
+import ChatInput from "../../game/ChatInput/ChatInput";
 
 // Example content (this would normally come from a service)
 const sampleContent: PaginatedContent = {

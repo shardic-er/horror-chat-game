@@ -1,13 +1,12 @@
 // src/store/vocabularySlice.ts
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { AppDispatch, RootState } from './store';
-import { addWordToVocabulary, loadUser } from '../services/userService';
-import { LLMClient } from '../services/llmClient';
-import { getApiKey } from '../services/apiKeyService';
-import GameLogger from '../services/loggerService';
+import { AppDispatch, RootState } from '../../types/store.types';
+import { addWordToVocabulary, loadUser } from '../../services/userService';
+import { LLMClient } from '../../services/llmClient';
+import { getApiKey } from '../../services/apiKeyService';
 
-interface VocabularyState {
+export interface VocabularySlice {
     knownWords: string[];
     wordLimit: number;
     isProcessingVariations: boolean;
@@ -102,7 +101,7 @@ const getUserVocabulary = (): string[] => {
     return userData?.vocabulary || ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
 };
 
-const initialState: VocabularyState = {
+const initialState: VocabularySlice = {
     knownWords: getUserVocabulary(),
     wordLimit: calculateWordLimit(getUserVocabulary().length),
     isProcessingVariations: false

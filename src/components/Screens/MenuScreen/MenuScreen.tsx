@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
-import { getApiKey, saveApiKey, validateApiKey } from '../../services/apiKeyService';
+import { getApiKey, saveApiKey, validateApiKey } from '../../../services/apiKeyService';
 import './MenuScreen.styles.css';
 
 interface MenuScreenProps {

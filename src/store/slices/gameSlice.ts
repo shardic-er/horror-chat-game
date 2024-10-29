@@ -1,25 +1,40 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { v4 as uuidv4 } from 'uuid';
-import { AppDispatch, RootState } from './store';
+import { AppDispatch, RootState } from '../../types/store.types';
 import {
-    GameState,
     UserData,
     ChatMessage,
-} from '../types/gameTypes';
+    ChatError,
+    ChatHistory,
+    AIPartner
+} from '../../types/gameTypes';
 import {
     loadUser,
     saveUser,
     createNewUser,
     updateUser
-} from '../services/userService';
-import { LLMClient } from '../services/llmClient';
-import { AI_PARTNERS } from '../config/aiPartners';
-import { getApiKey } from '../services/apiKeyService';
+} from '../../services/userService';
+import { LLMClient } from '../../services/llmClient';
+import { AI_PARTNERS } from '../../config/aiPartners';
+import { getApiKey } from '../../services/apiKeyService';
 
-
+export interface GameSlice {
+    currentUser: UserData | null;
+    chatHistories: Record<string, ChatHistory>;
+    availablePartners: AIPartner[];
+    currentPartnerId?: string;
+    isInitialized: boolean;
+    error?: string;
+    chatState: {
+        isLoading: boolean;
+        error: ChatError | null;
+        messageQueue: string[];
+        retryCount: number;
+    };
+}
 
 // Enhanced initial state with chat-specific fields
-const initialState: GameState = {
+const initialState: GameSlice = {
     currentUser: null,
     chatHistories: {},
     availablePartners: AI_PARTNERS,

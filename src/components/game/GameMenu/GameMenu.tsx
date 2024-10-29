@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameContent } from '../../types/gameTypes';
+import { GameContent } from '../../../types/gameTypes';
 import './GameMenu.styles.css';
 
 interface GameMenuProps {

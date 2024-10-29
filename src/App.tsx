@@ -1,16 +1,18 @@
 // src/App.tsx
 
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useAppDispatch } from './store/hooks';
-import MenuScreen from './components/Screens/MenuScreen';
-import GameScreen from './components/Screens/GameScreen';
-import WordCollectionManager from './components/WordCollection/WordCollectionManager';
-import { RootState } from './store/store';
-import { setScreen } from './store/navigationSlice';
+import MenuScreen from './components/Screens/MenuScreen/MenuScreen';
+import GameScreen from './components/Screens/GameScreen/GameScreen';
+import WordCollectionManager from './components/game/WordCollection/WordCollectionManager';
+import { setScreen } from './store/slices/navigationSlice';
 import { ScreenType } from './types/gameTypes';
 import { getApiKey } from './services/apiKeyService';
-import { initializeGame } from './store/gameSlice';
+import { initializeGame } from './store/slices/gameSlice';
+import { useSelector } from 'react-redux';
+import { RootState } from './types/store.types';
+import { NavigationSlice } from './store/slices/navigationSlice';
+
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch();

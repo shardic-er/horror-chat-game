@@ -8,6 +8,7 @@ __pycache__
 .jpg
 .csv
 project_structure.txt
+.webp
 key.txt
 .dll
 .lock

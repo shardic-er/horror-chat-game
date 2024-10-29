@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { NavigationProps } from '../../types/gameTypes';
+import { NavigationProps } from '../../../types/gameTypes';
 import './PageNavigation.styles.css';
 
 const PageNavigation: React.FC<NavigationProps> = ({

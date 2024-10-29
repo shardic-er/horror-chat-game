@@ -1,8 +1,8 @@
 // src/components/ChatWindow/ChatMessage.tsx
 
 import React, { useState, useCallback } from 'react';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { addNewWord } from '../../store/vocabularySlice';
+import { useAppSelector, useAppDispatch } from '../../../store/hooks';
+import { addNewWord } from '../../../store/slices/vocabularySlice';
 import RedactedWord from '../RedactedWord/RedactedWord';
 import './ChatMessage.styles.css';
 

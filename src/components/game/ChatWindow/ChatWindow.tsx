@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Alert } from 'react-bootstrap';
-import { useAppSelector } from '../../store/hooks';
+import { useAppSelector } from '../../../store/hooks';
 import ChatMessage from './ChatMessage';
 import './ChatWindow.styles.css';
 
