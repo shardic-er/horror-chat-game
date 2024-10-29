@@ -13,15 +13,19 @@ export const store = configureStore({
         getDefaultMiddleware({
             serializableCheck: {
                 // Ignore these action types for serialization check
-                ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+                ignoredActions: [
+                    'persist/PERSIST',
+                    'persist/REHYDRATE',
+                    'game/initializeGame'
+                ],
+                // Ignore these field paths in all actions
+                ignoredActionPaths: ['payload.createdAt', 'payload.lastLoginDate'],
+                // Ignore these paths in the state
+                ignoredPaths: ['game.currentUser.createdAt', 'game.currentUser.lastLoginDate'],
             },
         }),
 });
 
-// Clear navigation state on page load
-window.addEventListener('load', () => {
-    store.dispatch({ type: 'navigation/setScreen', payload: 'MENU' });
-});
-
+// Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

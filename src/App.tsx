@@ -1,20 +1,24 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from './store/hooks';  // Changed to useAppDispatch
 import MenuScreen from './components/Screens/MenuScreen';
 import GameScreen from './components/Screens/GameScreen';
 import { RootState } from './store/store';
 import { setScreen } from './store/navigationSlice';
 import { ScreenType } from './types/gameTypes';
 import { getApiKey } from './services/apiKeyService';
+import { initializeGame } from './store/gameSlice';
 
 const App: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();  // Now properly typed for thunks
   const currentScreen = useSelector((state: RootState) => state.navigation.currentScreen);
 
-  // Reset to menu on fresh load/refresh
+  // Initialize game state and load user data on mount
   useEffect(() => {
     const apiKey = getApiKey();
-    // Even if we have an API key, start at menu
+    // Initialize game which will load user data from cookie
+    dispatch(initializeGame());
+    // Start at menu regardless of saved state
     dispatch(setScreen(ScreenType.MENU));
   }, [dispatch]);
 

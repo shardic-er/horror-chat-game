@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { addWord } from '../../store/vocabularySlice';
+import { addNewWord } from '../../store/vocabularySlice';
 import './ChatMessage.styles.css';
 
 const ChatMessage: React.FC<{ content: string }> = ({ content }) => {
     const dispatch = useAppDispatch();
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
-    const wordSet = new Set(knownWords);
+    const wordSet = new Set(knownWords.map(word => word.toLowerCase()));
     const [activeRedaction, setActiveRedaction] = useState<number | null>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -24,16 +24,18 @@ const ChatMessage: React.FC<{ content: string }> = ({ content }) => {
         }, 0);
     };
 
-    const handleGuessSubmit = (index: number, guess: string) => {
+    const handleGuessSubmit = async (index: number, guess: string) => {
         const correctWord = words[index].toLowerCase();
         if (guess.toLowerCase() === correctWord) {
-            dispatch(addWord(correctWord));
+            // Dispatch the thunk that handles both Redux and cookie updates
+            await dispatch(addNewWord(correctWord));
             setActiveRedaction(null);
         } else {
             const input = inputRefs.current[index];
             if (input) {
                 input.classList.add('shake');
                 setTimeout(() => input.classList.remove('shake'), 500);
+                input.value = ''; // Clear incorrect guess
             }
         }
     };
@@ -45,35 +47,38 @@ const ChatMessage: React.FC<{ content: string }> = ({ content }) => {
 
                 return (
                     <span key={index} className="word-spacing">
-            {!wordState.isRedacted ? (
-                words[index]
-            ) : isActive ? (
-                <input
-                    ref={el => inputRefs.current[index] = el}
-                    className="redacted-input"
-                    style={{
-                        width: `${Math.max(words[index].length * 0.7 + 1, 2)}em`
-                    }}
-                    onBlur={() => setActiveRedaction(null)}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                            handleGuessSubmit(index, e.currentTarget.value);
-                        }
-                    }}
-                    autoFocus
-                />
-            ) : (
-                <button
-                    onClick={() => handleRedactionClick(index)}
-                    className="redacted-box"
-                    style={{
-                        width: `${Math.max(words[index].length * 0.7 + 1, 2)}em`
-                    }}
-                >
-                    {'█'.repeat(words[index].length)}
-                </button>
-            )}
-          </span>
+                        {!wordState.isRedacted ? (
+                            words[index]
+                        ) : isActive ? (
+                            <input
+                                ref={el => inputRefs.current[index] = el}
+                                className="redacted-input"
+                                style={{
+                                    width: `${Math.max(words[index].length * 0.7 + 1, 2)}em`
+                                }}
+                                onBlur={() => setActiveRedaction(null)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') {
+                                        handleGuessSubmit(index, e.currentTarget.value);
+                                    } else if (e.key === 'Escape') {
+                                        setActiveRedaction(null);
+                                    }
+                                }}
+                                autoComplete="off"
+                                autoFocus
+                            />
+                        ) : (
+                            <button
+                                onClick={() => handleRedactionClick(index)}
+                                className="redacted-box"
+                                style={{
+                                    width: `${Math.max(words[index].length * 0.7 + 1, 2)}em`
+                                }}
+                            >
+                                {'█'.repeat(words[index].length)}
+                            </button>
+                        )}
+                    </span>
                 );
             })}
         </div>

@@ -1,39 +1,30 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { AppDispatch } from './store';
 import { GameState, UserData, ChatMessage } from '../types/gameTypes';
-import { v4 as uuidv4 } from 'uuid';
-
-const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
-
-const createNewUser = (): UserData => ({
-    id: uuidv4(),
-    vocabulary: initialVocabulary,
-    progressFlags: {},
-    isRegistered: false
-});
+import { loadUser, saveUser, createNewUser, updateUser } from '../services/userService';
 
 const initialState: GameState = {
     currentUser: null,
     chatHistories: {},
     availablePartners: [],
-    isInitialized: false
+    isInitialized: false,
+    error: undefined
 };
 
 const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
-        initializeGame: (state) => {
-            if (!state.currentUser) {
-                state.currentUser = createNewUser();
-            }
-            state.isInitialized = true;
+        setCurrentUser: (state, action: PayloadAction<UserData>) => {
+            state.currentUser = action.payload;
         },
-        updateUser: (state, action: PayloadAction<Partial<UserData>>) => {
+        updateUserData: (state, action: PayloadAction<Partial<UserData>>) => {
             if (state.currentUser) {
                 state.currentUser = {
                     ...state.currentUser,
                     ...action.payload
                 };
+                // Note: The actual cookie update happens in the thunk
             }
         },
         addChatMessage: (state, action: PayloadAction<{
@@ -51,15 +42,45 @@ const gameSlice = createSlice({
         },
         setError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
+        },
+        setInitialized: (state, action: PayloadAction<boolean>) => {
+            state.isInitialized = action.payload;
         }
     }
 });
 
 export const {
-    initializeGame,
-    updateUser,
+    setCurrentUser,
+    updateUserData,
     addChatMessage,
-    setError
+    setError,
+    setInitialized
 } = gameSlice.actions;
+
+// Thunks for user data management
+export const initializeGame = () => async (dispatch: AppDispatch) => {
+    try {
+        let userData = loadUser();
+
+        if (!userData) {
+            userData = createNewUser();
+            saveUser(userData);
+        }
+
+        dispatch(setCurrentUser(userData));
+        dispatch(setInitialized(true));
+    } catch (error) {
+        dispatch(setError('Failed to initialize game'));
+    }
+};
+
+export const updateUserState = (updates: Partial<UserData>) => async (dispatch: AppDispatch) => {
+    try {
+        const updatedUser = updateUser(updates);
+        dispatch(setCurrentUser(updatedUser));
+    } catch (error) {
+        dispatch(setError('Failed to update user state'));
+    }
+};
 
 export default gameSlice.reducer;
