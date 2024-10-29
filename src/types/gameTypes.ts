@@ -8,6 +8,34 @@ export enum ScreenType {
     SETTINGS = 'SETTINGS'
 }
 
+export interface NavigationProps {
+    currentPage: number;
+    totalPages: number;
+    onNextPage: () => void;
+    onPrevPage: () => void;
+}
+
+export interface PageContent {
+    text: string;
+    imageRef?: string;
+    customStyles?: React.CSSProperties;
+}
+
+export interface PaginatedContent {
+    pages: PageContent[];
+    backgroundType: 'book' | 'terminal' | 'letter' | 'note';
+}
+
+export interface GameContent {
+    mode: DisplayMode;
+    content: PaginatedContent | AIPartner;
+}
+
+export interface ChatError {
+    message: string;
+    timestamp: string;
+}
+
 export interface UserData {
     id: string;
     vocabulary: string[];
@@ -29,18 +57,6 @@ export interface AIPartner {
     temperature: number;
 }
 
-export interface ChatError {
-    message: string;
-    timestamp: string;
-}
-
-export interface ChatState {
-    isLoading: boolean;
-    error: ChatError | null;
-    messageQueue: string[];
-    retryCount: number;
-}
-
 export interface ChatMessage {
     id: string;
     sender: 'user' | string;
@@ -59,37 +75,4 @@ export interface ChatHistory {
     messages: ChatMessage[];
 }
 
-export interface GameState {
-    currentUser: UserData | null;
-    chatHistories: Record<string, ChatHistory>;
-    availablePartners: AIPartner[];
-    currentPartnerId?: string;
-    isInitialized: boolean;
-    error?: string;
-    chatState: ChatState;
-}
-
-export interface PageContent {
-    text: string;
-    imageRef?: string;
-    customStyles?: React.CSSProperties;
-}
-
-export interface PaginatedContent {
-    pages: PageContent[];
-    backgroundType: 'book' | 'terminal' | 'letter' | 'note';
-}
-
-export interface NavigationProps {
-    currentPage: number;
-    totalPages: number;
-    onNextPage: () => void;
-    onPrevPage: () => void;
-}
-
 export type DisplayMode = 'chat' | 'reading';
-
-export interface GameContent {
-    mode: DisplayMode;
-    content: PaginatedContent | AIPartner;
-}
