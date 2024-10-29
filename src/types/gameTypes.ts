@@ -50,3 +50,29 @@ export interface GameState {
     isInitialized: boolean;
     error?: string;
 }
+
+// New pagination types
+export interface PageContent {
+    text: string;
+    imageRef?: string;
+    customStyles?: React.CSSProperties;
+}
+
+export interface PaginatedContent {
+    pages: PageContent[];
+    backgroundType: 'book' | 'terminal' | 'letter' | 'note';
+}
+
+export interface NavigationProps {
+    currentPage: number;
+    totalPages: number;
+    onNextPage: () => void;
+    onPrevPage: () => void;
+}
+
+export type DisplayMode = 'chat' | 'reading';
+
+export interface GameContent {
+    mode: DisplayMode;
+    content: PaginatedContent | AIPartner;
+}

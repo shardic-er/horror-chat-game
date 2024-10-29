@@ -1,84 +1,125 @@
-import React, { useRef, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { addNewWord } from '../../store/vocabularySlice';
+import RedactedWord from '../RedactedWord/RedactedWord';
 import './ChatMessage.styles.css';
 
-const ChatMessage: React.FC<{ content: string }> = ({ content }) => {
+interface ChatMessageProps {
+    content: string;
+    style?: React.CSSProperties;
+}
+
+interface ParsedWord {
+    fullWord: string;
+    baseWord: string;
+    prefix: string;
+    suffix: string;
+}
+
+const parseWord = (word: string): ParsedWord => {
+    const match = word.match(/^([^a-zA-Z0-9]*)([\w'-]+)([^a-zA-Z0-9]*)$/);
+
+    if (!match) {
+        return {
+            fullWord: word,
+            baseWord: '',
+            prefix: word,
+            suffix: ''
+        };
+    }
+
+    const [, prefix, baseWord, suffix] = match;
+    return {
+        fullWord: word,
+        baseWord: baseWord,
+        prefix: prefix,
+        suffix: suffix
+    };
+};
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ content, style }) => {
     const dispatch = useAppDispatch();
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
     const wordSet = new Set(knownWords.map(word => word.toLowerCase()));
-    const [activeRedaction, setActiveRedaction] = useState<number | null>(null);
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
 
-    const words = content.split(/\s+/);
-    const redactionStates = words.map(word => ({
-        word: word.toLowerCase(),
-        isRedacted: !wordSet.has(word.toLowerCase()),
-        currentGuess: ''
-    }));
+    const parsedWords = content.split(/\s+/).map(parseWord);
+    const redactedIndices = parsedWords
+        .map((parsed, index) => (parsed.baseWord && !wordSet.has(parsed.baseWord.toLowerCase()) ? index : -1))
+        .filter(index => index !== -1);
 
-    const handleRedactionClick = (index: number) => {
-        setActiveRedaction(index);
-        setTimeout(() => {
-            inputRefs.current[index]?.focus();
-        }, 0);
-    };
+    const moveToNextRedactedWord = useCallback((currentIndex: number | null, moveForward: boolean = true) => {
+        if (redactedIndices.length === 0) return;
 
-    const handleGuessSubmit = async (index: number, guess: string) => {
-        const correctWord = words[index].toLowerCase();
-        if (guess.toLowerCase() === correctWord) {
-            // Dispatch the thunk that handles both Redux and cookie updates
-            await dispatch(addNewWord(correctWord));
-            setActiveRedaction(null);
-        } else {
-            const input = inputRefs.current[index];
-            if (input) {
-                input.classList.add('shake');
-                setTimeout(() => input.classList.remove('shake'), 500);
-                input.value = ''; // Clear incorrect guess
-            }
+        if (currentIndex === null) {
+            setActiveWordIndex(redactedIndices[0]);
+            return;
         }
+
+        const currentPosition = redactedIndices.indexOf(currentIndex);
+        if (currentPosition === -1) return;
+
+        let nextPosition;
+        if (moveForward) {
+            nextPosition = (currentPosition + 1) % redactedIndices.length;
+        } else {
+            nextPosition = (currentPosition - 1 + redactedIndices.length) % redactedIndices.length;
+        }
+
+        setActiveWordIndex(redactedIndices[nextPosition]);
+    }, [redactedIndices]);
+
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            moveToNextRedactedWord(activeWordIndex, !e.shiftKey);
+        }
+    }, [activeWordIndex, moveToNextRedactedWord]);
+
+    const handleCorrectGuess = async (word: string) => {
+        await dispatch(addNewWord(word));
+        moveToNextRedactedWord(activeWordIndex);
     };
+
+    React.useEffect(() => {
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [handleKeyDown]);
 
     return (
-        <div className="chat-message">
-            {redactionStates.map((wordState, index) => {
-                const isActive = activeRedaction === index;
+        <div className="chat-message" style={style}>
+            {parsedWords.map((parsed, index) => {
+                const isRedacted = parsed.baseWord && !wordSet.has(parsed.baseWord.toLowerCase());
+                const isActive = activeWordIndex === index;
+
+                if (!parsed.baseWord) {
+                    return (
+                        <React.Fragment key={index}>
+                            <span className="known-word">{parsed.fullWord}</span>
+                            {index < parsedWords.length - 1 && ' '}
+                        </React.Fragment>
+                    );
+                }
 
                 return (
-                    <span key={index} className="word-spacing">
-                        {!wordState.isRedacted ? (
-                            words[index]
-                        ) : isActive ? (
-                            <input
-                                ref={el => inputRefs.current[index] = el}
-                                className="redacted-input"
-                                style={{
-                                    width: `${Math.max(words[index].length * 0.7 + 1, 2)}em`
-                                }}
-                                onBlur={() => setActiveRedaction(null)}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter') {
-                                        handleGuessSubmit(index, e.currentTarget.value);
-                                    } else if (e.key === 'Escape') {
-                                        setActiveRedaction(null);
-                                    }
-                                }}
-                                autoComplete="off"
-                                autoFocus
+                    <React.Fragment key={index}>
+                        {parsed.prefix && <span className="known-word">{parsed.prefix}</span>}
+                        {isRedacted ? (
+                            <RedactedWord
+                                word={parsed.baseWord}
+                                onCorrectGuess={handleCorrectGuess}
+                                isActive={isActive}
+                                onFocus={() => setActiveWordIndex(index)}
+                                onBlur={() => setActiveWordIndex(null)}
                             />
                         ) : (
-                            <button
-                                onClick={() => handleRedactionClick(index)}
-                                className="redacted-box"
-                                style={{
-                                    width: `${Math.max(words[index].length * 0.7 + 1, 2)}em`
-                                }}
-                            >
-                                {'█'.repeat(words[index].length)}
-                            </button>
+                            <span className="known-word">{parsed.baseWord}</span>
                         )}
-                    </span>
+                        {parsed.suffix && <span className="known-word">{parsed.suffix}</span>}
+                        {index < parsedWords.length - 1 && ' '}
+                    </React.Fragment>
                 );
             })}
         </div>
