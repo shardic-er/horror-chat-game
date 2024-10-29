@@ -10,8 +10,8 @@ export interface NavigationSlice {
 }
 
 const initialState: NavigationSlice = {
-    currentScreen: ScreenType.MENU,
-    displayMode: 'reading'
+    currentScreen: ScreenType.CHAT,
+    displayMode: 'chat'
 };
 
 const navigationSlice = createSlice({

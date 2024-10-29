@@ -1,11 +1,10 @@
 // src/types/gameTypes.ts
 
 export enum ScreenType {
-    TITLE = 'TITLE',
     MENU = 'MENU',
     CHAT = 'CHAT',
     LIBRARY = 'LIBRARY',
-    SETTINGS = 'SETTINGS'
+    READING = 'READING'
 }
 
 export interface NavigationProps {
@@ -15,9 +14,18 @@ export interface NavigationProps {
     onPrevPage: () => void;
 }
 
+export type PageImage = {
+    type: 'svg';
+    component: React.FC;
+} | {
+    type: 'url';
+    src: string;
+};
+
 export interface PageContent {
     text: string;
-    imageRef?: string;
+    imageRef?: string;  // Maintain backward compatibility
+    image?: PageImage;  // New image handling
     customStyles?: React.CSSProperties;
 }
 
@@ -75,4 +83,4 @@ export interface ChatHistory {
     messages: ChatMessage[];
 }
 
-export type DisplayMode = 'chat' | 'reading';
+export type DisplayMode = 'chat' | 'library' | 'reading';

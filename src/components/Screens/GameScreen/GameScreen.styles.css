@@ -1,3 +1,5 @@
+/* src/components/Screens/GameScreen/GameScreen.styles.css */
+
 .game-screen-container {
     height: 100vh;
     padding: 1rem;
@@ -59,6 +61,8 @@
     align-items: center;
     gap: 2rem;
     padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .chat-content {
@@ -66,6 +70,25 @@
     padding: 2rem;
 }
 
+/* SVG and Image Containers */
+.page-image-container {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 4 / 3;
+    margin: 0 auto;
+    background-color: var(--game-darker);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.page-image-container svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Legacy image support */
 .page-image {
     max-width: 80%;
     max-height: 300px;
@@ -74,8 +97,15 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Ensure text content has proper width */
+/* Text content */
 .page-content .chat-message {
     width: 100%;
     text-align: left;
+}
+
+/* Game content container */
+.game-content-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }

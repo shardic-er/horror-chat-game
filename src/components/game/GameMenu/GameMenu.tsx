@@ -1,20 +1,22 @@
+// src/components/game/GameMenu/GameMenu.tsx
+
 import React from 'react';
-import { GameContent } from '../../../types/gameTypes';
+import { DisplayMode } from '../../../types/gameTypes';
 import './GameMenu.styles.css';
 
 interface GameMenuProps {
-    currentMode: GameContent['mode'];
-    onModeSelect: (mode: GameContent['mode']) => void;
+    currentMode: DisplayMode;
+    onModeSelect: (mode: DisplayMode) => void;
 }
 
 const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
     return (
         <div className="game-menu">
             <button
-                className={`menu-button ${currentMode === 'reading' ? 'active' : ''}`}
-                onClick={() => onModeSelect('reading')}
-                aria-label="Reading Mode"
-                title="Reading Mode"
+                className={`menu-button ${currentMode === 'library' ? 'active' : ''}`}
+                onClick={() => onModeSelect('library')}
+                aria-label="Library Mode"
+                title="Library Mode"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
