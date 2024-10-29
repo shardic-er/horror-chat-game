@@ -1,4 +1,8 @@
+// src/components/RedactedWord/RedactedWord.tsx
+
 import React, { useState, useRef, useEffect } from 'react';
+import { useAppDispatch } from '../../store/hooks';
+import { addNewWord } from '../../store/vocabularySlice';
 import './RedactedWord.styles.css';
 
 interface RedactedWordProps {
@@ -16,41 +20,39 @@ const RedactedWord: React.FC<RedactedWordProps> = ({
                                                        onFocus,
                                                        onBlur
                                                    }) => {
+    const dispatch = useAppDispatch();
     const [guess, setGuess] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
+    const containerRef = useRef<HTMLSpanElement>(null);
 
-    useEffect(() => {
-        setGuess('');
-    }, [word, isActive]);
-
+    // Auto-focus when becoming active
     useEffect(() => {
         if (isActive && inputRef.current) {
             inputRef.current.focus();
         }
     }, [isActive]);
 
-    const checkGuess = (currentGuess: string) => {
+    const triggerWordDiscovery = (discoveredWord: string) => {
+        const discoveryEvent = new CustomEvent('wordDiscovered', {
+            detail: {
+                words: [discoveredWord],
+                sourceElement: containerRef.current
+            }
+        });
+        document.dispatchEvent(discoveryEvent);
+    };
+
+    const checkGuess = async (currentGuess: string) => {
         if (currentGuess.toLowerCase() === word.toLowerCase()) {
+            // First trigger the animation
+            triggerWordDiscovery(word);
+
+            // Then handle the word addition
+            await dispatch(addNewWord(word));
             onCorrectGuess(word);
             return true;
         }
         return false;
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            if (!checkGuess(guess)) {
-                inputRef.current?.classList.add('shake');
-                setTimeout(() => {
-                    inputRef.current?.classList.remove('shake');
-                }, 500);
-                setGuess('');
-            }
-        } else if (e.key === 'Escape') {
-            onBlur();
-        } else if (e.key === 'Backspace' && !guess) {
-            onBlur();
-        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,8 +66,28 @@ const RedactedWord: React.FC<RedactedWordProps> = ({
         }
     };
 
+    const handleButtonClick = () => {
+        onFocus();
+    };
+
+    const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            if (!await checkGuess(guess)) {
+                inputRef.current?.classList.add('shake');
+                setTimeout(() => {
+                    inputRef.current?.classList.remove('shake');
+                }, 500);
+                setGuess('');
+            }
+        } else if (e.key === 'Escape') {
+            onBlur();
+        } else if (e.key === 'Backspace' && !guess) {
+            onBlur();
+        }
+    };
+
     return (
-        <span className="redacted-word-wrapper">
+        <span className="redacted-word-wrapper" ref={containerRef}>
             {isActive ? (
                 <input
                     ref={inputRef}
@@ -86,7 +108,7 @@ const RedactedWord: React.FC<RedactedWordProps> = ({
                 />
             ) : (
                 <button
-                    onClick={onFocus}
+                    onClick={handleButtonClick}
                     className="redacted-word-mask"
                     style={{
                         width: `${word.length}ch`

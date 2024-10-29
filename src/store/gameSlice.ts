@@ -5,8 +5,6 @@ import {
     GameState,
     UserData,
     ChatMessage,
-    AIPartner,
-    ChatError
 } from '../types/gameTypes';
 import {
     loadUser,
@@ -14,8 +12,11 @@ import {
     createNewUser,
     updateUser
 } from '../services/userService';
-import { LLMClient, AI_PARTNERS } from '../services/llmClient';
+import { LLMClient } from '../services/llmClient';
+import { AI_PARTNERS } from '../config/aiPartners';
 import { getApiKey } from '../services/apiKeyService';
+
+
 
 // Enhanced initial state with chat-specific fields
 const initialState: GameState = {

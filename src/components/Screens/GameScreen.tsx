@@ -18,7 +18,7 @@ const sampleContent: PaginatedContent = {
     backgroundType: "book",
     pages: [
         {
-            text: "Once upon a time there were three little pigs who lived in the woods. They were very different from each other, but they all shared one common goal.",
+            text:"i'll they're i'm im ill theyre their there",
             imageRef: "https://picsum.photos/300",
             customStyles: {
                 fontSize: '1.2rem',

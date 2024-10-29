@@ -1,3 +1,5 @@
+// src/components/ChatWindow/ChatMessage.tsx
+
 import React, { useState, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { addNewWord } from '../../store/vocabularySlice';
@@ -40,8 +42,10 @@ const parseWord = (word: string): ParsedWord => {
 const ChatMessage: React.FC<ChatMessageProps> = ({ content, style }) => {
     const dispatch = useAppDispatch();
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
-    const wordSet = new Set(knownWords.map(word => word.toLowerCase()));
     const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
+
+    // Create a set of known words for faster lookups
+    const wordSet = new Set(knownWords.map(word => word.toLowerCase()));
 
     const parsedWords = content.split(/\s+/).map(parseWord);
     const redactedIndices = parsedWords
@@ -77,6 +81,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content, style }) => {
     }, [activeWordIndex, moveToNextRedactedWord]);
 
     const handleCorrectGuess = async (word: string) => {
+        console.log('Correct guess:', word); // Debug log
         await dispatch(addNewWord(word));
         moveToNextRedactedWord(activeWordIndex);
     };
