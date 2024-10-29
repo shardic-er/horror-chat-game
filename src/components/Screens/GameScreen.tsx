@@ -1,46 +1,52 @@
+// src/components/Screens/GameScreen.tsx
+
 import React, { useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
-import ChatMessage from '../ChatWindow/ChatMessage';
-import ChatInput from '../ChatInput/ChatInput';
 import VocabularyList from '../VocabularyList/VocabularyList';
 import PageNavigation from '../PageNavigation/PageNavigation';
 import GameMenu from '../GameMenu/GameMenu';
-import { PaginatedContent, GameContent } from '../../types/gameTypes';
+import { DisplayMode, GameContent, PaginatedContent } from '../../types/gameTypes';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { setDisplayMode } from '../../store/navigationSlice';
 import './GameScreen.styles.css';
+import ChatMessage from "../ChatWindow/ChatMessage";
+import ChatWindow from "../ChatWindow/ChatWindow";
+import ChatInput from "../ChatInput/ChatInput";
 
-// Example content (this would normally come from props or a service)
-const sampleContent: GameContent = {
-    mode: 'reading',
-    content: {
-        backgroundType: "book",
-        pages: [
-            {
-                text: "Once upon a time there were three little pigs who lived in the woods.",
-                imageRef: "/api/placeholder/400/300",
-                customStyles: {
-                    fontSize: '1.2rem',
-                    lineHeight: '1.8'
-                }
-            },
-            {
-                text: "The first pig built his house of straw, because it was the easiest thing to do."
-            },
-            {
-                text: "The second pig built his house of sticks, thinking it would be stronger than straw.",
-                imageRef: "/api/placeholder/400/300"
+// Example content (this would normally come from a service)
+const sampleContent: PaginatedContent = {
+    backgroundType: "book",
+    pages: [
+        {
+            text: "Once upon a time there were three little pigs who lived in the woods. They were very different from each other, but they all shared one common goal.",
+            imageRef: "https://picsum.photos/300",
+            customStyles: {
+                fontSize: '1.2rem',
+                lineHeight: '1.8'
             }
-        ]
-    }
+        },
+        {
+            text: "The first pig built his house of straw, because it was the easiest thing to do. He spent most of his time playing and dancing.",
+            imageRef: "https://picsum.photos/300"
+        },
+        {
+            text: "The second pig built his house of sticks, thinking it would be stronger than straw. He worked a bit harder but still preferred leisure over labor.",
+            imageRef: "https://picsum.photos/300"
+        }
+    ]
 };
 
 const GameScreen: React.FC = () => {
+    const dispatch = useAppDispatch();
     const [isInputFull, setIsInputFull] = useState(false);
     const [currentPage, setCurrentPage] = useState(0);
-    const [currentMode, setCurrentMode] = useState<GameContent['mode']>('reading');
 
-    const paginatedContent = currentMode === 'reading'
-        ? sampleContent.content as PaginatedContent
-        : null;
+    const currentMode = useAppSelector(state => state.navigation.displayMode);
+    const currentPartnerId = useAppSelector(state => state.game.currentPartnerId);
+
+    const handleModeSelect = (mode: DisplayMode) => {
+        dispatch(setDisplayMode(mode));
+    };
 
     const handleVocabWordSelect = (word: string) => {
         const event = new CustomEvent('vocab-word-selected', {
@@ -50,7 +56,7 @@ const GameScreen: React.FC = () => {
     };
 
     const handleNextPage = () => {
-        if (paginatedContent && currentPage < paginatedContent.pages.length - 1) {
+        if (currentPage < sampleContent.pages.length - 1) {
             setCurrentPage(curr => curr + 1);
         }
     };
@@ -62,10 +68,10 @@ const GameScreen: React.FC = () => {
     };
 
     const renderContent = () => {
-        if (currentMode === 'reading' && paginatedContent) {
-            const currentPageContent = paginatedContent.pages[currentPage];
+        if (currentMode === 'reading') {
+            const currentPageContent = sampleContent.pages[currentPage];
             return (
-                <>
+                <div className={`chat-messages-container ${sampleContent.backgroundType}`}>
                     <div className="page-content">
                         {currentPageContent.imageRef && (
                             <img
@@ -81,18 +87,21 @@ const GameScreen: React.FC = () => {
                     </div>
                     <PageNavigation
                         currentPage={currentPage}
-                        totalPages={paginatedContent.pages.length}
+                        totalPages={sampleContent.pages.length}
                         onNextPage={handleNextPage}
                         onPrevPage={handlePrevPage}
                     />
-                </>
+                </div>
             );
         }
 
         return (
-            <div className="chat-content">
-                <ChatMessage content="Hello! How can I help you today?" />
-            </div>
+            <>
+                <div className="chat-messages-container chat">
+                    <ChatWindow />
+                </div>
+                <ChatInput onInputLimitChange={setIsInputFull} />
+            </>
         );
     };
 
@@ -102,19 +111,11 @@ const GameScreen: React.FC = () => {
                 <Col xs="auto" className="p-0">
                     <GameMenu
                         currentMode={currentMode}
-                        onModeSelect={setCurrentMode}
+                        onModeSelect={handleModeSelect}
                     />
                 </Col>
                 <Col xs className="d-flex flex-column chat-area">
-                    <div className={`chat-messages-container ${paginatedContent?.backgroundType}`}>
-                        {renderContent()}
-                    </div>
-                    {currentMode === 'chat' && (
-                        <ChatInput
-                            onSend={message => console.log('Sending:', message)}
-                            onInputLimitChange={setIsInputFull}
-                        />
-                    )}
+                    {renderContent()}
                 </Col>
                 <Col xs={3}>
                     <VocabularyList

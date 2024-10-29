@@ -1,15 +1,76 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppDispatch } from './store';
-import { GameState, UserData, ChatMessage } from '../types/gameTypes';
-import { loadUser, saveUser, createNewUser, updateUser } from '../services/userService';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { v4 as uuidv4 } from 'uuid';
+import { AppDispatch, RootState } from './store';
+import {
+    GameState,
+    UserData,
+    ChatMessage,
+    AIPartner,
+    ChatError
+} from '../types/gameTypes';
+import {
+    loadUser,
+    saveUser,
+    createNewUser,
+    updateUser
+} from '../services/userService';
+import { LLMClient, AI_PARTNERS } from '../services/llmClient';
+import { getApiKey } from '../services/apiKeyService';
 
+// Enhanced initial state with chat-specific fields
 const initialState: GameState = {
     currentUser: null,
     chatHistories: {},
-    availablePartners: [],
+    availablePartners: AI_PARTNERS,
+    currentPartnerId: AI_PARTNERS[0].id,
     isInitialized: false,
-    error: undefined
+    error: undefined,
+    chatState: {
+        isLoading: false,
+        error: null,
+        messageQueue: [],
+        retryCount: 0
+    }
 };
+
+// Async thunk for sending messages
+export const sendMessage = createAsyncThunk<
+    string,
+    { message: string; partnerId: string },
+    { state: RootState }
+    >(
+    'game/sendMessage',
+    async ({ message, partnerId }, { getState, rejectWithValue }) => {
+        console.log('User Message:', message); // Debug logging
+
+        const apiKey = getApiKey();
+        if (!apiKey) {
+            throw new Error('API key not found');
+        }
+
+        const state = getState();
+        const partner = state.game.availablePartners.find(p => p.id === partnerId);
+        if (!partner) {
+            throw new Error('AI partner not found');
+        }
+
+        const chatHistory = state.game.chatHistories[partnerId]?.messages || [];
+        console.log('Chat History:', chatHistory); // Debug logging
+
+        try {
+            const llmClient = new LLMClient(apiKey);
+            const response = await llmClient.generateResponse(
+                partner,
+                chatHistory,
+                message
+            );
+            console.log('AI Response:', response); // Debug logging
+            return response;
+        } catch (error) {
+            return rejectWithValue((error as Error).message);
+        }
+    }
+);
 
 const gameSlice = createSlice({
     name: 'game',
@@ -24,7 +85,6 @@ const gameSlice = createSlice({
                     ...state.currentUser,
                     ...action.payload
                 };
-                // Note: The actual cookie update happens in the thunk
             }
         },
         addChatMessage: (state, action: PayloadAction<{
@@ -40,24 +100,75 @@ const gameSlice = createSlice({
             }
             state.chatHistories[partnerId].messages.push(message);
         },
+        setCurrentPartner: (state, action: PayloadAction<string>) => {
+            state.currentPartnerId = action.payload;
+        },
+        clearChatError: (state) => {
+            state.chatState.error = null;
+        },
         setError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
         },
         setInitialized: (state, action: PayloadAction<boolean>) => {
             state.isInitialized = action.payload;
+        },
+        resetChatState: (state) => {
+            state.chatState = initialState.chatState;
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            // Handle sendMessage lifecycle
+            .addCase(sendMessage.pending, (state) => {
+                state.chatState.isLoading = true;
+                state.chatState.error = null;
+            })
+            .addCase(sendMessage.fulfilled, (state, action) => {
+                state.chatState.isLoading = false;
+                state.chatState.retryCount = 0;
+
+                // Add AI response to chat history
+                if (state.currentPartnerId) {
+                    const aiMessage: ChatMessage = {
+                        id: uuidv4(),
+                        sender: state.currentPartnerId,
+                        content: action.payload
+                    };
+
+                    if (!state.chatHistories[state.currentPartnerId]) {
+                        state.chatHistories[state.currentPartnerId] = {
+                            partnerId: state.currentPartnerId,
+                            messages: []
+                        };
+                    }
+
+                    state.chatHistories[state.currentPartnerId].messages.push(aiMessage);
+                }
+            })
+            .addCase(sendMessage.rejected, (state, action) => {
+                state.chatState.isLoading = false;
+                state.chatState.error = {
+                    message: action.payload as string || 'Failed to send message',
+                    timestamp: new Date().toISOString()
+                };
+                state.chatState.retryCount += 1;
+            });
     }
 });
 
+// Export actions
 export const {
     setCurrentUser,
     updateUserData,
     addChatMessage,
+    setCurrentPartner,
+    clearChatError,
     setError,
-    setInitialized
+    setInitialized,
+    resetChatState
 } = gameSlice.actions;
 
-// Thunks for user data management
+// Thunk for initializing the game
 export const initializeGame = () => async (dispatch: AppDispatch) => {
     try {
         let userData = loadUser();
@@ -74,12 +185,43 @@ export const initializeGame = () => async (dispatch: AppDispatch) => {
     }
 };
 
+// Thunk for updating user state
 export const updateUserState = (updates: Partial<UserData>) => async (dispatch: AppDispatch) => {
     try {
         const updatedUser = updateUser(updates);
         dispatch(setCurrentUser(updatedUser));
     } catch (error) {
         dispatch(setError('Failed to update user state'));
+    }
+};
+
+// Helper thunk for sending a message and handling the response
+export const sendChatMessage = (message: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState();
+    const { currentPartnerId } = state.game;
+
+    if (!currentPartnerId) {
+        dispatch(setError('No AI partner selected'));
+        return;
+    }
+
+    // First add the user's message to the chat history
+    const userMessage: ChatMessage = {
+        id: uuidv4(),
+        sender: 'user',
+        content: message
+    };
+
+    dispatch(addChatMessage({
+        partnerId: currentPartnerId,
+        message: userMessage
+    }));
+
+    // Then send the message to the AI
+    try {
+        await dispatch(sendMessage({ message, partnerId: currentPartnerId }));
+    } catch (error) {
+        console.error('Error sending message:', error);
     }
 };
 

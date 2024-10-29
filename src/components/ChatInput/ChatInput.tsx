@@ -1,29 +1,31 @@
+// src/components/ChatInput/ChatInput.tsx
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Card, Badge } from 'react-bootstrap';
-import { useAppSelector } from '../../store/hooks';
+import { Card, Badge, Spinner } from 'react-bootstrap';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { sendChatMessage } from '../../store/gameSlice';
 import './ChatInput.styles.css';
 
 interface ChatInputProps {
-    onSend?: (message: string) => void;
     onInputLimitChange?: (isAtLimit: boolean) => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSend, onInputLimitChange }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onInputLimitChange }) => {
+    const dispatch = useAppDispatch();
     const [stagedWords, setStagedWords] = useState<string[]>([]);
     const [currentInput, setCurrentInput] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
 
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
     const wordLimit = useAppSelector((state) => state.vocabulary.wordLimit);
+    const isLoading = useAppSelector((state) => state.game.chatState.isLoading);
 
     const isAtWordLimit = stagedWords.length >= wordLimit;
 
-    // Notify parent of limit changes
     useEffect(() => {
         onInputLimitChange?.(isAtWordLimit);
     }, [isAtWordLimit, onInputLimitChange]);
 
-    // Add event listener for vocabulary word selections
     useEffect(() => {
         const handleVocabWord = (event: CustomEvent<{ word: string }>) => {
             if (!isAtWordLimit) {
@@ -34,7 +36,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onInputLimitChange }) => 
         };
 
         window.addEventListener('vocab-word-selected', handleVocabWord as EventListener);
-
         return () => {
             window.removeEventListener('vocab-word-selected', handleVocabWord as EventListener);
         };
@@ -55,7 +56,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onInputLimitChange }) => 
         if (isAtWordLimit) return;
 
         const value = e.target.value.toLowerCase();
-
         if (!/^[a-z\s]*$/.test(value)) return;
 
         const lastWord = value.split(' ').pop() || '';
@@ -88,9 +88,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onInputLimitChange }) => 
         }
     };
 
-    const handleSendMessage = () => {
-        if (stagedWords.length > 0) {
-            onSend?.(stagedWords.join(' '));
+    const handleSendMessage = async () => {
+        if (stagedWords.length > 0 && !isLoading) {
+            const message = stagedWords.join(' ');
+            await dispatch(sendChatMessage(message));
             setStagedWords([]);
             setCurrentInput('');
         }
@@ -108,7 +109,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onInputLimitChange }) => 
                                         key={index}
                                         bg="secondary"
                                         className="word-badge"
-                                        tabIndex={-1}  // Prevent focus
+                                        tabIndex={-1}
                                     >
                                         {word}
                                     </Badge>
@@ -122,15 +123,25 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, onInputLimitChange }) => 
                                     placeholder={isAtWordLimit ? 'Press Enter to send' : `${wordLimit} words maximum`}
                                     className={`inline-input ${isAtWordLimit ? 'at-limit' : ''}`}
                                     aria-label="Word input"
+                                    disabled={isLoading}
                                 />
                             </div>
                             <button
                                 onClick={handleSendMessage}
                                 className="send-button"
-                                disabled={stagedWords.length === 0}
+                                disabled={stagedWords.length === 0 || isLoading}
                                 aria-label="Send message"
                             >
-                                →
+                                {isLoading ? (
+                                    <Spinner
+                                        animation="border"
+                                        size="sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                    />
+                                ) : (
+                                    '→'
+                                )}
                             </button>
                         </div>
                         {suggestions.length > 0 && currentInput && !isAtWordLimit && (

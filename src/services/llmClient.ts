@@ -6,7 +6,7 @@ export class LLMClient {
     private contextWindow: number = 4096;
 
     constructor(apiKey: string) {
-        this.client = new OpenAI({ apiKey });
+        this.client = new OpenAI({ apiKey , dangerouslyAllowBrowser: true});
     }
 
     private prepareMessages(

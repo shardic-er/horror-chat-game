@@ -1,3 +1,5 @@
+// src/types/gameTypes.ts
+
 export enum ScreenType {
     TITLE = 'TITLE',
     MENU = 'MENU',
@@ -27,14 +29,28 @@ export interface AIPartner {
     temperature: number;
 }
 
+export interface ChatError {
+    message: string;
+    timestamp: string;
+}
+
+export interface ChatState {
+    isLoading: boolean;
+    error: ChatError | null;
+    messageQueue: string[];
+    retryCount: number;
+}
+
 export interface ChatMessage {
     id: string;
     sender: 'user' | string;
     content: string;
+    timestamp?: string;
     metadata?: {
         isRedacted?: boolean;
         isError?: boolean;
         isTutorial?: boolean;
+        isRetry?: boolean;
     };
 }
 
@@ -47,11 +63,12 @@ export interface GameState {
     currentUser: UserData | null;
     chatHistories: Record<string, ChatHistory>;
     availablePartners: AIPartner[];
+    currentPartnerId?: string;
     isInitialized: boolean;
     error?: string;
+    chatState: ChatState;
 }
 
-// New pagination types
 export interface PageContent {
     text: string;
     imageRef?: string;
