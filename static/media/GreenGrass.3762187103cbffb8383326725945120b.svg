@@ -1,0 +1,14 @@
+<!-- src/assets/library/ColorsAllAround/images/GreenGrass.svg -->
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="150" fill="#87ceeb"/>
+    <rect width="400" height="150" y="150" fill="#90be6d"/>
+    <path d="M 50 150 C 50 120, 70 100, 90 150" fill="#43a047"/>
+    <path d="M 150 150 C 150 110, 170 90, 190 150" fill="#43a047"/>
+    <path d="M 250 150 C 250 100, 270 80, 290 150" fill="#43a047"/>
+    <path d="M 350 150 C 350 110, 370 90, 390 150" fill="#43a047"/>
+    <!-- Trees in background -->
+    <path d="M 100 150 L 150 50 L 200 150" fill="#2e7d32"/>
+    <rect x="140" y="150" width="20" height="40" fill="#795548"/>
+    <path d="M 300 150 L 350 30 L 400 150" fill="#2e7d32"/>
+    <rect x="340" y="150" width="20" height="40" fill="#795548"/>
+</svg>

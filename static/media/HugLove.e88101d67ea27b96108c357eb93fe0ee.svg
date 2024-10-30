@@ -1,0 +1,83 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Soft purple background -->
+    <rect width="400" height="300" fill="#f3e5f5"/>
+
+    <!-- Cat family group -->
+    <g transform="translate(200 150)">
+        <!-- Parent cat -->
+        <g>
+            <!-- Body -->
+            <path d="M -20 0
+                    C -60 0, -80 40, -60 80
+                    C -40 100, 0 100, 20 80
+                    C 40 60, 40 20, 20 0"
+                  fill="#9c27b0"/>
+
+            <!-- Head -->
+            <path d="M -20 0
+                    C -40 -40, 40 -40, 20 0"
+                  fill="#9c27b0"/>
+
+            <!-- Ears -->
+            <path d="M -30 -20 L -40 -40 L -20 -30 Z" fill="#7b1fa2"/>
+            <path d="M 30 -20 L 40 -40 L 20 -30 Z" fill="#7b1fa2"/>
+
+            <!-- Face -->
+            <circle cx="-10" cy="-15" r="5" fill="#ffffff"/>
+            <circle cx="10" cy="-15" r="5" fill="#ffffff"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="2" fill="#7b1fa2"/>
+
+            <!-- Whiskers -->
+            <g stroke="#7b1fa2" stroke-width="1">
+                <line x1="-25" y1="-5" x2="-10" y2="-8"/>
+                <line x1="-25" y1="-2" x2="-10" y2="-5"/>
+                <line x1="-25" y1="1" x2="-10" y2="-2"/>
+                <line x1="25" y1="-5" x2="10" y2="-8"/>
+                <line x1="25" y1="-2" x2="10" y2="-5"/>
+                <line x1="25" y1="1" x2="10" y2="-2"/>
+            </g>
+        </g>
+
+        <!-- Kitten -->
+        <g transform="translate(-20 40) scale(0.6)">
+            <!-- Body -->
+            <path d="M -20 0
+                    C -60 0, -80 40, -60 80
+                    C -40 100, 0 100, 20 80
+                    C 40 60, 40 20, 20 0"
+                  fill="#ce93d8"/>
+
+            <!-- Head -->
+            <path d="M -20 0
+                    C -40 -40, 40 -40, 20 0"
+                  fill="#ce93d8"/>
+
+            <!-- Ears -->
+            <path d="M -30 -20 L -40 -40 L -20 -30 Z" fill="#ba68c8"/>
+            <path d="M 30 -20 L 40 -40 L 20 -30 Z" fill="#ba68c8"/>
+
+            <!-- Face -->
+            <circle cx="-10" cy="-15" r="5" fill="#ffffff"/>
+            <circle cx="10" cy="-15" r="5" fill="#ffffff"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="2" fill="#ba68c8"/>
+
+            <!-- Whiskers -->
+            <g stroke="#ba68c8" stroke-width="1">
+                <line x1="-25" y1="-5" x2="-10" y2="-8"/>
+                <line x1="-25" y1="-2" x2="-10" y2="-5"/>
+                <line x1="-25" y1="1" x2="-10" y2="-2"/>
+                <line x1="25" y1="-5" x2="10" y2="-8"/>
+                <line x1="25" y1="-2" x2="10" y2="-5"/>
+                <line x1="25" y1="1" x2="10" y2="-2"/>
+            </g>
+        </g>
+
+        <!-- Hugging paws -->
+        <path d="M -40 40
+                C -20 60, 20 60, 40 40"
+              fill="none"
+              stroke="#9c27b0"
+              stroke-width="8"
+              stroke-linecap="round"/>
+    </g>
+</svg>

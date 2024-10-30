@@ -1,0 +1,23 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#f8f9fa"/>
+    <!-- Moon -->
+    <circle cx="320" cy="60" r="40" fill="#ffd700"/>
+    <circle cx="340" cy="50" r="30" fill="#f8f9fa"/>
+    <!-- Wall -->
+    <rect x="0" y="200" width="400" height="100" fill="#868e96"/>
+    <!-- Cats -->
+    <g transform="translate(100,180)">
+        <path d="M 0,0 L -15,-30 L 15,-30 Z" fill="#495057"/> <!-- Ear -->
+        <path d="M 30,0 L 15,-30 L 45,-30 Z" fill="#495057"/> <!-- Ear -->
+        <circle cx="15" cy="0" r="25" fill="#495057"/> <!-- Head -->
+        <circle cx="5" cy="-5" r="3" fill="#51cf66"/> <!-- Eye -->
+        <circle cx="25" cy="-5" r="3" fill="#51cf66"/> <!-- Eye -->
+    </g>
+    <g transform="translate(250,180)">
+        <path d="M 0,0 L -15,-30 L 15,-30 Z" fill="#343a40"/> <!-- Ear -->
+        <path d="M 30,0 L 15,-30 L 45,-30 Z" fill="#343a40"/> <!-- Ear -->
+        <circle cx="15" cy="0" r="25" fill="#343a40"/> <!-- Head -->
+        <circle cx="5" cy="-5" r="3" fill="#51cf66"/> <!-- Eye -->
+        <circle cx="25" cy="-5" r="3" fill="#51cf66"/> <!-- Eye -->
+    </g>
+</svg>
