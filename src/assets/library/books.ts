@@ -8,7 +8,7 @@ import { recoveryNotesBook } from './RecoveryNotes/RecoveryNotes';
 import { countingNumbersBook } from './CountingNumbers/CountingNumbers';
 import { shapesBook } from './ShapesBook/ShapesBook';
 import { petsBook } from './PetsBook/PetsBook';
-import { allAboutLoveBook } from "./LoveIsYou/LoveIsYou";
+import allAboutLove from "./AllAboutLove/AllAboutLove";
 import ColorsAllAround from "./ColorsAllAround/ColorsAllAround";
 
 export const libraryContent: Book[] = [
@@ -20,5 +20,5 @@ export const libraryContent: Book[] = [
     countingNumbersBook,
     shapesBook,
     petsBook,
-    allAboutLoveBook,
+    allAboutLove,
 ];

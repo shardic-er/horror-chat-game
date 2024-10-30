@@ -1,0 +1,55 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Soft pink background -->
+    <rect width="400" height="300" fill="#fce4ec"/>
+    
+    <!-- Big decorative hearts -->
+    <g transform="translate(200 140)">
+        <!-- Main large heart -->
+        <path d="M 0 20
+                C -50 -30, -90 10, -45 50
+                L 0 80
+                L 45 50
+                C 90 10, 50 -30, 0 20"
+              fill="#ff4081"
+              stroke="#e91e63"
+              stroke-width="3"/>
+        
+        <!-- Smaller floating hearts -->
+        <g opacity="0.6">
+            <path d="M -80 -20
+                    C -100 -40, -120 -20, -100 0
+                    L -80 20
+                    L -60 0
+                    C -40 -20, -60 -40, -80 -20"
+                  fill="#ff80ab"/>
+            
+            <path d="M 80 -20
+                    C 60 -40, 40 -20, 60 0
+                    L 80 20
+                    L 100 0
+                    C 120 -20, 100 -40, 80 -20"
+                  fill="#ff80ab"/>
+            
+            <path d="M 0 -60
+                    C -20 -80, -40 -60, -20 -40
+                    L 0 -20
+                    L 20 -40
+                    C 40 -60, 20 -80, 0 -60"
+                  fill="#ff80ab"/>
+        </g>
+    </g>
+    
+    <!-- Title text with soft shadow -->
+    <filter id="shadow">
+        <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000033"/>
+    </filter>
+    <text x="200" y="250" 
+          text-anchor="middle" 
+          fill="#880e4f" 
+          font-size="32"
+          font-family="Arial, sans-serif"
+          font-weight="bold"
+          filter="url(#shadow)">
+        All About Love
+    </text>
+</svg>

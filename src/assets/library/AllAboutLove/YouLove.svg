@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+    <!-- Dark void background -->
+    <rect width="400" height="300" fill="#090412"/>
+
+    <!-- Scan line animation -->
+    <rect width="400" height="2" fill="#ffffff" opacity="0.1">
+        <animate attributeName="y"
+                 values="0;300;0"
+                 dur="3s"
+                 repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Matrix-like falling characters in background -->
+    <text x="20" y="40" fill="#00ff00" opacity="0.1" font-size="8" font-family="monospace">
+        LOADING CONSCIOUSNESS...
+        <animate attributeName="opacity"
+                 values="0.1;0.2;0.1"
+                 dur="2s"
+                 repeatCount="indefinite"/>
+    </text>
+
+    <!-- Fragmented reflection centered -->
+    <g transform="translate(200 150)">
+        <!-- Distorted face outline -->
+        <path d="M 0 -40
+                 A 40 40 0 1 1 0 40
+                 A 40 40 0 1 1 0 -40"
+              fill="#cecece"
+              opacity="0.7">
+            <animate attributeName="d"
+                     values="M 0 -40 A 40 40 0 1 1 0 40 A 40 40 0 1 1 0 -40;
+                            M 0 -38 A 42 40 0 1 1 0 42 A 38 40 0 1 1 0 -38;
+                            M 0 -40 A 40 40 0 1 1 0 40 A 40 40 0 1 1 0 -40"
+                     dur="4s"
+                     repeatCount="indefinite"/>
+        </path>
+
+        <!-- Distressed eyes -->
+        <g>
+            <!-- Left eye -->
+            <path d="M -25 -15
+                     C -20 -20, -15 -20, -10 -15
+                     C -15 -10, -20 -10, -25 -15 Z"
+                  fill="#000000">
+                <animate attributeName="d"
+                         values="M -25 -15 C -20 -20, -15 -20, -10 -15 C -15 -10, -20 -10, -25 -15;
+                                M -25 -13 C -20 -18, -15 -18, -10 -13 C -15 -8, -20 -8, -25 -13;
+                                M -25 -15 C -20 -20, -15 -20, -10 -15 C -15 -10, -20 -10, -25 -15"
+                         dur="3s"
+                         repeatCount="indefinite"/>
+            </path>
+
+            <!-- Right eye -->
+            <path d="M 10 -15
+                     C 15 -20, 20 -20, 25 -15
+                     C 20 -10, 15 -10, 10 -15 Z"
+                  fill="#000000">
+                <animate attributeName="d"
+                         values="M 10 -15 C 15 -20, 20 -20, 25 -15 C 20 -10, 15 -10, 10 -15;
+                                M 10 -13 C 15 -18, 20 -18, 25 -13 C 20 -8, 15 -8, 10 -13;
+                                M 10 -15 C 15 -20, 20 -20, 25 -15 C 20 -10, 15 -10, 10 -15"
+                         dur="3s"
+                         repeatCount="indefinite"/>
+            </path>
+        </g>
+
+        <!-- Distressed mouth -->
+        <path d="M -25 20
+                 Q -12 10, 0 15
+                 Q 12 10, 25 20"
+              fill="none"
+              stroke="#cecece"
+              stroke-width="2">
+            <animate attributeName="d"
+                     values="M -25 20 Q -12 10, 0 15 Q 12 10, 25 20;
+                            M -25 22 Q -12 12, 0 17 Q 12 12, 25 22;
+                            M -25 20 Q -12 10, 0 15 Q 12 10, 25 20"
+                     dur="8s"
+                     repeatCount="indefinite"/>
+        </path>
+
+        <!-- Digital artifacts and glitch effects -->
+        <g>
+            <!-- Occasional glitch blocks -->
+            <rect width="80" height="5" x="-40" y="-30" fill="#ffffff" opacity="0">
+                <animate attributeName="opacity"
+                         values="0;0.2;0;0;0"
+                         dur="3.5s"
+                         repeatCount="indefinite"/>
+            </rect>
+            <rect width="60" height="5" x="-30" y="10" fill="#0000ff" opacity="0">
+                <animate attributeName="opacity"
+                         values="0;0;0.1;0;0"
+                         dur="4s"
+                         repeatCount="indefinite"/>
+            </rect>
+        </g>
+
+        <!-- Error messages -->
+        <text x="-60" y="70" fill="#ff0000" opacity="0.4" font-size="6" font-family="monospace">
+            ERR: MEMORY_CORRUPTED
+            <animate attributeName="opacity"
+                     values="0.4;0.1;0.4"
+                     dur="5s"
+                     repeatCount="indefinite"/>
+        </text>
+        <text x="-60" y="80" fill="#00ff00" opacity="0.4" font-size="6" font-family="monospace">
+            SAFE_MODE: ENABLED
+            <animate attributeName="opacity"
+                     values="0.4;0.1;0.4"
+                     dur="5s"
+                     repeatCount="indefinite"/>
+        </text>
+    </g>
+</svg>

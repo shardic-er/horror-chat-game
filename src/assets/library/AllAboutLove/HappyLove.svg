@@ -1,0 +1,50 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Yellow happy background -->
+    <rect width="400" height="300" fill="#fff8e1"/>
+
+    <!-- Baby and parent -->
+    <g transform="translate(200 150)">
+        <!-- Parent -->
+        <g transform="translate(-40 0)">
+            <circle cx="0" cy="0" r="40" fill="#ffb74d"/>
+            <circle cx="-15" cy="-10" r="5" fill="#ffffff"/>
+            <circle cx="15" cy="-10" r="5" fill="#ffffff"/>
+            <path d="M -20 10 Q 0 30 20 10"
+                  fill="none"
+                  stroke="#f57c00"
+                  stroke-width="4"
+                  stroke-linecap="round"/>
+        </g>
+
+        <!-- Baby -->
+        <g transform="translate(40 0) scale(0.7)">
+            <circle cx="0" cy="0" r="40" fill="#ffcc80"/>
+            <circle cx="-15" cy="-10" r="5" fill="#ffffff"/>
+            <circle cx="15" cy="-10" r="5" fill="#ffffff"/>
+            <path d="M -20 10 Q 0 30 20 10"
+                  fill="none"
+                  stroke="#f57c00"
+                  stroke-width="4"
+                  stroke-linecap="round"/>
+        </g>
+
+        <!-- Floating hearts -->
+        <g fill="#ff80ab">
+            <path d="M 0 -60
+                    C -10 -70, -25 -60, -15 -50
+                    L 0 -40
+                    L 15 -50
+                    C 25 -60, 10 -70, 0 -60"/>
+            <path d="M -60 -20
+                    C -70 -30, -85 -20, -75 -10
+                    L -60 0
+                    L -45 -10
+                    C -35 -20, -50 -30, -60 -20"/>
+            <path d="M 60 -20
+                    C 50 -30, 35 -20, 45 -10
+                    L 60 0
+                    L 75 -10
+                    C 85 -20, 70 -30, 60 -20"/>
+        </g>
+    </g>
+</svg>
