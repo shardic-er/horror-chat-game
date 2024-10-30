@@ -1,3 +1,5 @@
+// src/services/userService.ts
+
 import { UserData } from '../types/gameTypes';
 import Cookies from 'js-cookie';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +13,8 @@ const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and'
 export const createNewUser = (): UserData => ({
     id: uuidv4(),
     vocabulary: initialVocabulary,
+    forgottenWords: [],
+    validatedTypoCount: 0,
     progressFlags: {
         completedTutorial: false,
         hasReadFirstBook: false,
@@ -19,11 +23,13 @@ export const createNewUser = (): UserData => ({
     isRegistered: false,
 });
 
-// Save user data to cookie
+// Update saveUser to explicitly handle these fields
 export const saveUser = (userData: UserData): void => {
     try {
         const serializedUser = JSON.stringify({
             ...userData,
+            forgottenWords: userData.forgottenWords || [],
+            validatedTypoCount: userData.validatedTypoCount || 0
         });
         Cookies.set(USER_COOKIE_KEY, serializedUser, { expires: 365 });
     } catch (error) {
@@ -31,7 +37,7 @@ export const saveUser = (userData: UserData): void => {
     }
 };
 
-// Load user data from cookie
+// Update loadUser to ensure these fields are loaded
 export const loadUser = (): UserData | null => {
     try {
         const savedUser = Cookies.get(USER_COOKIE_KEY);
@@ -40,6 +46,8 @@ export const loadUser = (): UserData | null => {
         const parsedUser = JSON.parse(savedUser);
         return {
             ...parsedUser,
+            forgottenWords: parsedUser.forgottenWords || [],
+            validatedTypoCount: parsedUser.validatedTypoCount || 0,
             lastLoginDate: new Date(parsedUser.lastLoginDate),
             createdAt: new Date(parsedUser.createdAt)
         };
@@ -73,6 +81,27 @@ export const addWordToVocabulary = (word: string): UserData | null => {
         const updatedUser = {
             ...currentUser,
             vocabulary: [...currentUser.vocabulary, word.toLowerCase()]
+        };
+        saveUser(updatedUser);
+        return updatedUser;
+    }
+
+    return currentUser;
+};
+
+// Remove a word from user's vocabulary
+export const removeWordFromVocabulary = (word: string): UserData | null => {
+    const currentUser = loadUser();
+    if (!currentUser) return null;
+
+    const lowerWord = word.toLowerCase();
+
+    // Only proceed if the word isn't already forgotten
+    if (!currentUser.forgottenWords.includes(lowerWord)) {
+        const updatedUser = {
+            ...currentUser,
+            vocabulary: currentUser.vocabulary.filter(w => w.toLowerCase() !== lowerWord),
+            forgottenWords: [...currentUser.forgottenWords, lowerWord]
         };
         saveUser(updatedUser);
         return updatedUser;

@@ -6,12 +6,12 @@ import VocabularyList from '../../game/VocabularyList/VocabularyList';
 import PageNavigation from '../../game/PageNavigation/PageNavigation';
 import GameMenu from '../../game/GameMenu/GameMenu';
 import LibraryScreen from '../LibraryScreen/LibraryScreen';
-import {DisplayMode, PageContent} from '../../../types/gameTypes';
+import ForgetScreen from '../ForgetScreen/ForgetScreen';  // Add this import
+import { DisplayMode } from '../../../types/gameTypes';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { setDisplayMode } from '../../../store/slices/navigationSlice';
 import { Book } from '../../../types/libraryTypes';
 import './GameScreen.styles.css';
-import ChatMessage from "../../game/ChatWindow/ChatMessage";
 import ChatWindow from "../../game/ChatWindow/ChatWindow";
 import ChatInput from "../../game/ChatInput/ChatInput";
 
@@ -46,49 +46,6 @@ const GameScreen: React.FC = () => {
         dispatch(setDisplayMode('reading'));
     };
 
-    const handleNextPage = () => {
-        if (selectedBook && currentPage < selectedBook.content.pages.length - 1) {
-            setCurrentPage(curr => curr + 1);
-        }
-    };
-
-    const handlePrevPage = () => {
-        if (currentPage > 0) {
-            setCurrentPage(curr => curr - 1);
-        }
-    };
-
-    const renderPageImage = (page: PageContent) => {
-        if (page.image) {
-            // Handle new image format
-            if (page.image.type === 'svg') {
-                return (
-                    <div className="page-image-container">
-                        {React.createElement(page.image.component)}
-                    </div>
-                );
-            } else {
-                return (
-                    <img
-                        src={page.image.src}
-                        alt="Page illustration"
-                        className="page-image"
-                    />
-                );
-            }
-        } else if (page.imageRef) {
-            // Handle legacy imageRef format
-            return (
-                <img
-                    src={page.imageRef}
-                    alt="Page illustration"
-                    className="page-image"
-                />
-            );
-        }
-        return null;
-    };
-
     const renderContent = () => {
         switch (currentMode) {
             case 'library':
@@ -100,21 +57,16 @@ const GameScreen: React.FC = () => {
 
             case 'reading':
                 if (!selectedBook) return null;
-                const pageContent = selectedBook.content.pages[currentPage];
                 return (
                     <div className={`chat-messages-container ${selectedBook.content.backgroundType}`}>
                         <div className="page-content">
-                            {renderPageImage(pageContent)}
-                            <ChatMessage
-                                content={pageContent.text}
-                                style={pageContent.customStyles}
-                            />
+                            {/* ... existing reading mode content ... */}
                         </div>
                         <PageNavigation
                             currentPage={currentPage}
                             totalPages={selectedBook.content.pages.length}
-                            onNextPage={handleNextPage}
-                            onPrevPage={handlePrevPage}
+                            onNextPage={() => currentPage < selectedBook.content.pages.length - 1 && setCurrentPage(p => p + 1)}
+                            onPrevPage={() => currentPage > 0 && setCurrentPage(p => p - 1)}
                         />
                     </div>
                 );
@@ -128,6 +80,9 @@ const GameScreen: React.FC = () => {
                         <ChatInput onInputLimitChange={setIsInputFull} />
                     </>
                 );
+
+            case 'forget':
+                return <ForgetScreen />;
 
             default:
                 return null;

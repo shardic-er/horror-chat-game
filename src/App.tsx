@@ -7,11 +7,10 @@ import GameScreen from './components/Screens/GameScreen/GameScreen';
 import WordCollectionManager from './components/game/WordCollection/WordCollectionManager';
 import { setScreen } from './store/slices/navigationSlice';
 import { ScreenType } from './types/gameTypes';
-import { getApiKey } from './services/apiKeyService';
 import { initializeGame } from './store/slices/gameSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from './types/store.types';
-import { NavigationSlice } from './store/slices/navigationSlice';
+import WordDeletionManager from "./components/game/WordDeletion/WordDeletionManager";
 
 
 const App: React.FC = () => {
@@ -20,10 +19,7 @@ const App: React.FC = () => {
 
   // Initialize game state and load user data on mount
   useEffect(() => {
-    const apiKey = getApiKey();
-    // Initialize game which will load user data from cookie
     dispatch(initializeGame());
-    // Start at menu regardless of saved state
     dispatch(setScreen(ScreenType.MENU));
   }, [dispatch]);
 
@@ -50,6 +46,7 @@ const App: React.FC = () => {
       <div className="min-h-screen bg-gray-900 text-gray-100">
         {renderScreen()}
         <WordCollectionManager />
+        <WordDeletionManager/>
       </div>
   );
 };

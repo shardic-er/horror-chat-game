@@ -1,0 +1,56 @@
+/* src/components/Screens/ForgetScreen/ForgetScreen.styles.css */
+
+.forget-screen {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.forget-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../../../assets/images/IWantToForget.webp');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.3);
+    z-index: 0;
+}
+
+.forget-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2rem;
+}
+
+.progress-section {
+    text-align: center;
+    color: white;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.progress-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.progress-text {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+.trash-section {
+    max-width: 800px;
+    margin: 2rem auto;
+    width: 100%;
+}

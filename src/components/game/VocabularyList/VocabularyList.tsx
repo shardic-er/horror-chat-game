@@ -1,3 +1,5 @@
+// src/components/game/VocabularyList/VocabularyList.tsx
+
 import React, { useState, useMemo } from 'react';
 import { useAppSelector } from '../../../store/hooks';
 import { Form, Badge, Card } from 'react-bootstrap';
@@ -10,13 +12,36 @@ interface VocabularyListProps {
 
 const VocabularyList: React.FC<VocabularyListProps> = ({ onWordSelect, isInputFull = false }) => {
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
+    const forgottenWords = useAppSelector((state) => state.vocabulary.forgottenWords);
+    const currentMode = useAppSelector(state => state.navigation.displayMode);
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredWords = useMemo(() => {
-        return knownWords.filter(word =>
-            word.toLowerCase().includes(searchTerm.toLowerCase())
-        ).sort();
-    }, [knownWords, searchTerm]);
+        return knownWords
+            .filter(word => {
+                const matchesSearch = word.toLowerCase().includes(searchTerm.toLowerCase());
+                // In forget mode, also filter out already forgotten words
+                if (currentMode === 'forget') {
+                    return matchesSearch && !forgottenWords.includes(word.toLowerCase());
+                }
+                return matchesSearch;
+            })
+            .sort();
+    }, [knownWords, searchTerm, currentMode, forgottenWords]);
+
+    const handleWordClick = (word: string) => {
+        if (isInputFull) return;
+
+        if (currentMode === 'forget') {
+            // Dispatch a custom event for the trash input
+            const event = new CustomEvent('vocab-word-selected', {
+                detail: { word, mode: 'forget' }
+            });
+            window.dispatchEvent(event);
+        } else {
+            onWordSelect(word);
+        }
+    };
 
     return (
         <Card bg="dark" text="light" className="vocabulary-card">
@@ -35,9 +60,9 @@ const VocabularyList: React.FC<VocabularyListProps> = ({ onWordSelect, isInputFu
                         {filteredWords.map((word, index) => (
                             <Badge
                                 key={index}
-                                bg="secondary"
+                                bg={currentMode === 'forget' ? 'danger' : 'secondary'}
                                 className={`vocabulary-badge ${isInputFull ? 'disabled' : ''}`}
-                                onClick={() => !isInputFull && onWordSelect(word)}
+                                onClick={() => !isInputFull && handleWordClick(word)}
                                 role="button"
                                 aria-disabled={isInputFull}
                             >

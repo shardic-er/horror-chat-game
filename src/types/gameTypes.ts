@@ -4,7 +4,8 @@ export enum ScreenType {
     MENU = 'MENU',
     CHAT = 'CHAT',
     LIBRARY = 'LIBRARY',
-    READING = 'READING'
+    READING = 'READING',
+    FORGET = 'FORGET'
 }
 
 export interface NavigationProps {
@@ -50,6 +51,8 @@ export interface ChatError {
 export interface UserData {
     id: string;
     vocabulary: string[];
+    forgottenWords: string[];  // Track deleted words
+    validatedTypoCount: number;  // Track count of validated typos
     progressFlags: {
         [key: string]: boolean;
     };
@@ -86,4 +89,4 @@ export interface ChatHistory {
     messages: ChatMessage[];
 }
 
-export type DisplayMode = 'chat' | 'library' | 'reading';
+export type DisplayMode = 'chat' | 'library' | 'reading' | 'forget';
