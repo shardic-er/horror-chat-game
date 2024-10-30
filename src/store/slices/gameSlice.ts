@@ -92,6 +92,13 @@ const gameSlice = createSlice({
     name: 'game',
     initialState,
     reducers: {
+        resetChatHistory: (state, action: PayloadAction<string>) => {
+            const partnerId = action.payload;
+            state.chatHistories[partnerId] = {
+                partnerId,
+                messages: []
+            };
+        },
         setCurrentUser: (state, action: PayloadAction<UserData>) => {
             state.currentUser = action.payload;
         },
@@ -181,7 +188,8 @@ export const {
     clearChatError,
     setError,
     setInitialized,
-    resetChatState
+    resetChatState,
+    resetChatHistory,
 } = gameSlice.actions;
 
 // Thunk for initializing the game

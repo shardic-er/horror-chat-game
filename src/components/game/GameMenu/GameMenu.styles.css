@@ -6,6 +6,7 @@
     background: var(--game-darker);
     border-right: 1px solid var(--game-border);
     height: 100%;
+    position: relative;
 }
 
 .menu-button {
@@ -21,6 +22,7 @@
     transition: all 0.2s ease;
     color: var(--game-text);
     padding: 0;
+    position: relative;
 }
 
 .menu-button:hover {
@@ -39,4 +41,84 @@
 .menu-icon {
     width: 24px;
     height: 24px;
+}
+
+.chat-menu-container {
+    position: relative;
+}
+
+.chat-menu-container.expanded .menu-button {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.partner-list {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background: var(--game-dark);
+    border: 1px solid var(--game-border);
+    border-radius: 8px;
+    margin-left: 0.5rem;
+    min-width: 150px;
+    z-index: 1000;
+    animation: slideIn 0.2s ease-out;
+    overflow: hidden;
+}
+
+.partner-button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--game-text);
+    text-align: left;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.partner-button:hover {
+    background: var(--game-hover);
+}
+
+.partner-button.active {
+    background: var(--game-hover);
+    color: var(--bs-primary);
+}
+
+.partner-button.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--bs-primary);
+}
+
+.debug-button {
+    margin-top: auto;
+    color: var(--bs-danger);
+    border-color: var(--bs-danger);
+}
+
+.debug-button:hover {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.debug-button.active {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: var(--bs-danger);
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }

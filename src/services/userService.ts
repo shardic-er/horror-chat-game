@@ -1,6 +1,6 @@
 // src/services/userService.ts
 
-import { UserData } from '../types/gameTypes';
+import {ProgressFlag, UserData} from '../types/gameTypes';
 import Cookies from 'js-cookie';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,17 +9,22 @@ const USER_COOKIE_KEY = 'horror_game_user';
 // Initial vocabulary every new user starts with
 const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
 
+// Initialize progress flags with all enum values set to false
+const initializeProgressFlags = (): { [K in ProgressFlag]: boolean } => {
+    const flags = {} as { [K in ProgressFlag]: boolean };
+    Object.values(ProgressFlag).forEach(flag => {
+        flags[flag] = false;
+    });
+    return flags;
+};
+
 // Create a new user with initial state
 export const createNewUser = (): UserData => ({
     id: uuidv4(),
     vocabulary: initialVocabulary,
     forgottenWords: [],
     validatedTypoCount: 0,
-    progressFlags: {
-        completedTutorial: false,
-        hasReadFirstBook: false,
-        hasMetTerminal: false
-    },
+    progressFlags: initializeProgressFlags(),
     isRegistered: false,
 });
 

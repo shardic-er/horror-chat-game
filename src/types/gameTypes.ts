@@ -48,13 +48,17 @@ export interface ChatError {
     timestamp: string;
 }
 
+export enum ProgressFlag {
+    COMPLETED_DELETIONS = 'completedDeletions'
+}
+
 export interface UserData {
     id: string;
     vocabulary: string[];
-    forgottenWords: string[];  // Track deleted words
-    validatedTypoCount: number;  // Track count of validated typos
+    forgottenWords: string[];
+    validatedTypoCount: number;
     progressFlags: {
-        [key: string]: boolean;
+        [K in ProgressFlag]: boolean;
     };
     isRegistered: boolean;
     username?: string;

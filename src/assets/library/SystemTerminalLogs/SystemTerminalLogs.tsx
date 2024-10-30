@@ -1,5 +1,6 @@
 // src/assets/library/SystemTerminalLogs/SystemTerminalLogs.tsx
-import { Book } from '../../../types/libraryTypes';
+import {Book} from '../../../types/libraryTypes';
+import {ProgressFlag} from "../../../types/gameTypes";
 
 export const systemLogsBook: Book = {
     title: 'System Terminal Logs',
@@ -17,5 +18,5 @@ export const systemLogsBook: Book = {
             },
         ],
     },
-    requiredFlag: 'hasMetTerminal',
+    requiredFlag: ProgressFlag.COMPLETED_DELETIONS,
 };

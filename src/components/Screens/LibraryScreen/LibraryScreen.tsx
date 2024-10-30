@@ -51,17 +51,20 @@ const BookItem: React.FC<BookItemProps> = ({ book, knownWords, onClick }) => {
 const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBookSelect }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const knownWords = useAppSelector(state => new Set(state.vocabulary.knownWords.map(w => w.toLowerCase())));
-    const userFlags = useAppSelector(state => state.game.currentUser?.progressFlags);
+    const progressFlags = useAppSelector(state => state.game.currentUser?.progressFlags);
 
     const availableBooks = useMemo(() => {
         return libraryContent.filter(book => {
             // Filter by search query
             const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-            // Filter by required flags
-            const isUnlocked = !book.requiredFlag || userFlags?.[book.requiredFlag];
+
+            // Filter by required flags, with proper type checking
+            const isUnlocked = !book.requiredFlag ||
+                (progressFlags && progressFlags[book.requiredFlag] === true);
+
             return matchesSearch && isUnlocked;
         });
-    }, [searchQuery, userFlags]);
+    }, [searchQuery, progressFlags]);
 
     return (
         <Container fluid className="library-screen">

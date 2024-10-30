@@ -1,11 +1,11 @@
 // src/types/libraryTypes.ts
 
-import { PaginatedContent } from './gameTypes';
+import {PaginatedContent, ProgressFlag} from './gameTypes';
 
 export interface Book {
     title: string;
     content: PaginatedContent;
-    requiredFlag?: string;
+    requiredFlag?: ProgressFlag;
 }
 
 // Helper to get unique words from text
