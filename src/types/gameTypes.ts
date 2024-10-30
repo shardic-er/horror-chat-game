@@ -14,13 +14,16 @@ export interface NavigationProps {
     onPrevPage: () => void;
 }
 
-export type PageImage = {
+export type PageImage =
+    | {
     type: 'svg';
-    component: React.FC;
-} | {
+    component: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}
+    | {
     type: 'url';
     src: string;
 };
+
 
 export interface PageContent {
     text: string;

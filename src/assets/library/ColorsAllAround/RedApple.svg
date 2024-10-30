@@ -1,0 +1,28 @@
+<!-- src/assets/library/ColorsAllAround/images/RedApple.svg -->
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#f5f5f5"/>
+    <!-- Main apple -->
+    <g transform="translate(200, 150)">
+        <!-- Stem -->
+        <path d="M 0 -60 C -10 -70, 10 -80, 0 -90" stroke="#795548" stroke-width="8" fill="none"/>
+        <!-- Leaf -->
+        <path d="M 10 -75 C 30 -85, 40 -65, 20 -60" fill="#43a047"/>
+        <!-- Apple body -->
+        <path d="M -50 -50 C -100 -50, -100 50, -50 50 C -50 80, 50 80, 50 50 C 100 50, 100 -50, 50 -50 C 50 -80, -50 -80, -50 -50" fill="#e53935"/>
+        <!-- Highlight -->
+        <path d="M -20 -30 C -40 -30, -40 -10, -20 -10 C -20 0, 0 0, 0 -10 C 20 -10, 20 -30, 0 -30 C 0 -40, -20 -40, -20 -30" fill="#ff6b6b" opacity="0.5"/>
+    </g>
+    <!-- Red rose -->
+    <g transform="translate(350, 150)">
+        <!-- Stem -->
+        <line x1="0" y1="0" x2="0" y2="60" stroke="#43a047" stroke-width="4"/>
+        <!-- Leaf -->
+        <path d="M 0 30 C 20 20, 30 40, 10 50" fill="#43a047"/>
+        <!-- Rose petals -->
+        <path d="M 0 0 C -20 -20, -20 20, 0 0" fill="#e53935"/>
+        <path d="M 0 0 C 20 -20, 20 20, 0 0" fill="#e53935"/>
+        <path d="M 0 0 C -20 -20, 20 -20, 0 0" fill="#e53935"/>
+        <path d="M 0 0 C -20 20, 20 20, 0 0" fill="#e53935"/>
+        <circle cx="0" cy="0" r="10" fill="#c62828"/>
+    </g>
+</svg>

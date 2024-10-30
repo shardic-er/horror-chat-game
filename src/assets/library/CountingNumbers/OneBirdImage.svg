@@ -1,0 +1,12 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#87ceeb"/>
+    <!-- Sun -->
+    <circle cx="60" cy="60" r="30" fill="#ffd700"/>
+    <!-- Cloud -->
+    <path d="M 280,80 Q 290,50 320,60 Q 340,40 360,60 Q 380,50 390,70 Q 400,90 380,90 Q 370,110 350,100 Q 330,120 310,100 Q 290,110 280,80"
+          fill="white"/>
+    <!-- Bird -->
+    <path d="M 200,150 Q 220,140 240,150 L 220,160 Z" fill="#333"/>
+    <circle cx="235" cy="147" r="3" fill="white"/>
+    <path d="M 190,150 Q 220,180 250,150" fill="transparent" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+</svg>

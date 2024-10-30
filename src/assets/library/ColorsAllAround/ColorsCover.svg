@@ -1,0 +1,7 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#f0f0f0"/>
+    <circle cx="100" cy="150" r="40" fill="#ff0000" />
+    <circle cx="200" cy="150" r="40" fill="#00ff00" />
+    <circle cx="300" cy="150" r="40" fill="#0000ff" />
+    <text x="200" y="250" text-anchor="middle" fill="#333" font-size="24">Colors!</text>
+</svg>
