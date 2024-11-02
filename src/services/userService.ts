@@ -7,6 +7,13 @@ import GameLogger from './loggerService';
 
 export const USER_COOKIE_KEY = 'horror_game_user';
 
+let userDataCache: {
+    data: UserData | null;
+    timestamp: number;
+} | null = null;
+
+const CACHE_DURATION = 1000; // 1 second;
+
 // Initial vocabulary every new user starts with
 const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
 
@@ -71,50 +78,34 @@ export const saveUser = (userData: UserData): void => {
 
         // Only save if we're under size limit
         if (dataSize <= 4096) {
-            Cookies.remove(USER_COOKIE_KEY); // Clear existing cookie first
+            Cookies.remove(USER_COOKIE_KEY);
             Cookies.set(USER_COOKIE_KEY, serializedUser, { expires: 365 });
-
-            // Immediate verification
-            const verifyData = Cookies.get(USER_COOKIE_KEY);
-            if (verifyData) {
-                const parsedVerify = JSON.parse(verifyData);
-                const saveSuccessful =
-                    JSON.stringify(parsedVerify.vocabulary.sort()) ===
-                    JSON.stringify(uniqueVocabulary.sort());
-
-                GameLogger.logGameState({
-                    type: 'Save Verification',
-                    expectedSize: uniqueVocabulary.length,
-                    actualSize: parsedVerify.vocabulary.length,
-                    saveSuccessful,
-                    expectedVocabulary: uniqueVocabulary,
-                    actualVocabulary: parsedVerify.vocabulary
-                });
-
-                if (!saveSuccessful) {
-                    GameLogger.logError('saveUser', 'Verification failed - saved data does not match original');
-                }
-            }
-        } else {
-            GameLogger.logError('saveUser', 'Data exceeds cookie size limit');
+            // Update cache with the saved data
+            userDataCache = {
+                data: userDataToSave,
+                timestamp: Date.now()
+            };
         }
     } catch (error) {
         GameLogger.logError('saveUser', error);
     }
 };
 
+// Update loadUser to use cache
 export const loadUser = (): UserData | null => {
+    const now = Date.now();
+
+    // Return cached data if valid
+    if (userDataCache && (now - userDataCache.timestamp < CACHE_DURATION)) {
+        return userDataCache.data;
+    }
+
     try {
         const savedUser = Cookies.get(USER_COOKIE_KEY);
         if (!savedUser) {
-            GameLogger.logError('loadUser', 'No saved user found');
+            userDataCache = { data: null, timestamp: now };
             return null;
         }
-
-        GameLogger.logGameState({
-            type: 'Pre-Parse User Data',
-            rawData: savedUser
-        });
 
         const parsedUser = JSON.parse(savedUser);
 
@@ -130,11 +121,11 @@ export const loadUser = (): UserData | null => {
             validatedTypoCount: parsedUser.validatedTypoCount || 0
         };
 
-        GameLogger.logGameState({
-            type: 'Post-Load User Data',
-            vocabularySize: userData.vocabulary.length,
-            vocabulary: userData.vocabulary
-        });
+        // Update cache
+        userDataCache = {
+            data: userData,
+            timestamp: now
+        };
 
         return userData;
 
@@ -143,6 +134,7 @@ export const loadUser = (): UserData | null => {
         return null;
     }
 };
+
 // Update specific user fields and save to cookie
 export const updateUser = (updates: Partial<UserData>): UserData => {
     const currentUser = loadUser();

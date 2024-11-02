@@ -14,43 +14,53 @@ import WordDeletionManager from "./components/game/WordDeletion/WordDeletionMana
 import { loadUser } from './services/userService';
 import { addWords } from './store/slices/vocabularySlice';
 import GameLogger from './services/loggerService';
-import { USER_COOKIE_KEY } from './services/userService'
+import { USER_COOKIE_KEY } from './services/userService';
 
 const App: React.FC = () => {
     const dispatch = useAppDispatch();
     const currentScreen = useSelector((state: RootState) => state.navigation.currentScreen);
 
-    // Initialize game state and load user data on mount
+    // Single storage event handler
     useEffect(() => {
-        dispatch(initializeGame());
-        dispatch(setScreen(ScreenType.MENU));
-    }, [dispatch]);
+        let lastUpdate = Date.now();
+        const DEBOUNCE_TIME = 1000; // 1 second
 
-    // Handle multi-tab synchronization
-    useEffect(() => {
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === USER_COOKIE_KEY) {
-                GameLogger.logGameState({
-                    type: 'Storage Event',
-                    action: 'Detected change in another tab'
-                });
-
-                const userData = loadUser();
-                if (userData) {
-                    // Update vocabulary in Redux store
-                    dispatch(addWords(userData.vocabulary));
+                const now = Date.now();
+                if (now - lastUpdate > DEBOUNCE_TIME) {
+                    lastUpdate = now;
 
                     GameLogger.logGameState({
                         type: 'Storage Event',
-                        action: 'Synchronized vocabulary from other tab',
-                        vocabularySize: userData.vocabulary.length
+                        action: 'Processing storage change'
                     });
+
+                    const userData = loadUser();
+                    if (userData) {
+                        dispatch(addWords(userData.vocabulary));
+                        GameLogger.logGameState({
+                            type: 'Storage Event',
+                            action: 'Synchronized vocabulary from other tab',
+                            vocabularySize: userData.vocabulary.length
+                        });
+                    }
                 }
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
+    }, [dispatch]);
+
+    // Single initialization effect
+    useEffect(() => {
+        const initApp = async () => {
+            await dispatch(initializeGame());
+            dispatch(setScreen(ScreenType.MENU));
+        };
+
+        initApp();
     }, [dispatch]);
 
     const renderScreen = () => {

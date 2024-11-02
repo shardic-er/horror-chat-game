@@ -8,6 +8,7 @@ import { getApiKey } from '../../services/apiKeyService';
 import { ProgressFlag } from '../../types/gameTypes';
 import { updateUserState } from './gameSlice';
 import GameLogger from "../../services/loggerService";
+import { createSelector } from '@reduxjs/toolkit';
 
 export interface VocabularySlice {
     knownWords: string[];
@@ -29,6 +30,9 @@ const dispatchWordForgottenEvent = (words: string[]) => {
     });
     document.dispatchEvent(event);
 };
+
+// Memoized base selectors
+const selectValidatedTypoCount = (state: RootState) => state.vocabulary.validatedTypoCount;
 
 const dispatchWordDiscoveredEvent = (words: string[]) => {
     const event = new CustomEvent('wordDiscovered', {
@@ -153,11 +157,15 @@ const vocabularySlice = createSlice({
     }
 });
 
-export const selectMistakeProgress = (state: RootState): MistakeProgress => ({
-    current: state.vocabulary.validatedTypoCount,
-    max: 100,
-    isComplete: state.vocabulary.validatedTypoCount >= 100
-});
+// Memoized computed selector
+export const selectMistakeProgress = createSelector(
+    [selectValidatedTypoCount],
+    (typoCount) => ({
+        current: typoCount,
+        max: 100,
+        isComplete: typoCount >= 100
+    })
+);
 
 export const {
     addWord,
