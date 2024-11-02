@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useRef, useState} from 'react';
 import { DisplayMode, ProgressFlag } from '../../../types/gameTypes';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { selectMistakeProgress } from '../../../store/slices/vocabularySlice';
@@ -21,6 +21,7 @@ const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
     const dispatch = useAppDispatch();
     const [showPartners, setShowPartners] = useState(false);
     const [debugMode, setDebugMode] = useState(false);
+    const debugButtonRef = useRef<HTMLButtonElement>(null);
     const mistakeProgress = useAppSelector(selectMistakeProgress);
     const currentPartnerId = useAppSelector(state => state.game.currentPartnerId);
     const completedDeletions = useAppSelector(state =>
@@ -103,6 +104,7 @@ const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
             </button>
 
             <button
+                ref={debugButtonRef}
                 className={`menu-button debug-button ${debugMode ? 'active' : ''}`}
                 onClick={() => setDebugMode(!debugMode)}
                 aria-label="Debug Mode"
@@ -111,7 +113,11 @@ const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
                 <DebugModeIcon className="menu-icon" />
             </button>
 
-            <DebugMode isActive={debugMode} />
+            <DebugMode
+                isActive={debugMode}
+                onClose={() => setDebugMode(false)}
+                anchorRef={debugButtonRef}
+            />
         </div>
     );
 };

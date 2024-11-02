@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppDispatch } from '../../../store/hooks';
 import { addNewWord } from '../../../store/slices/vocabularySlice';
 import './RedactedWord.styles.css';
+import GameLogger from "../../../services/loggerService";
 
 interface RedactedWordProps {
     word: string;
@@ -33,6 +34,7 @@ const RedactedWord: React.FC<RedactedWordProps> = ({
     }, [isActive]);
 
     const triggerWordDiscovery = (discoveredWord: string) => {
+        GameLogger.logWordDiscovery(discoveredWord, 'RedactedWord guess');
         const discoveryEvent = new CustomEvent('wordDiscovered', {
             detail: {
                 words: [discoveredWord],
@@ -43,25 +45,41 @@ const RedactedWord: React.FC<RedactedWordProps> = ({
     };
 
     const checkGuess = async (currentGuess: string) => {
-        if (currentGuess.toLowerCase() === word.toLowerCase()) {
-            // First trigger the animation
-            triggerWordDiscovery(word);
+        const normalizedGuess = currentGuess.toLowerCase();
+        const normalizedWord = word.toLowerCase();
 
-            // Then handle the word addition
-            await dispatch(addNewWord(word));
-            onCorrectGuess(word);
-            return true;
+        if (normalizedGuess === normalizedWord) {
+            try {
+                GameLogger.logGameState({
+                    type: 'Correct Guess',
+                    word: normalizedWord,
+                    guess: normalizedGuess
+                });
+
+                // First add the word to vocabulary
+                await dispatch(addNewWord(normalizedWord));
+
+                // Then trigger animation
+                triggerWordDiscovery(normalizedWord);
+
+                // Finally call the success callback
+                onCorrectGuess(normalizedWord);
+                return true;
+            } catch (error) {
+                GameLogger.logError('checkGuess', error);
+                return false;
+            }
         }
         return false;
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const newGuess = e.target.value;
         if (newGuess.length <= word.length) {
             setGuess(newGuess);
             // Check if the guess is correct as soon as we have the right number of characters
             if (newGuess.length === word.length) {
-                checkGuess(newGuess);
+                await checkGuess(newGuess);
             }
         }
     };

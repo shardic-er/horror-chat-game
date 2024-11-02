@@ -3,8 +3,9 @@
 import {ProgressFlag, UserData} from '../types/gameTypes';
 import Cookies from 'js-cookie';
 import { v4 as uuidv4 } from 'uuid';
+import GameLogger from './loggerService';
 
-const USER_COOKIE_KEY = 'horror_game_user';
+export const USER_COOKIE_KEY = 'horror_game_user';
 
 // Initial vocabulary every new user starts with
 const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
@@ -28,40 +29,120 @@ export const createNewUser = (): UserData => ({
     isRegistered: false,
 });
 
-// Update saveUser to explicitly handle these fields
 export const saveUser = (userData: UserData): void => {
     try {
-        const serializedUser = JSON.stringify({
-            ...userData,
-            forgottenWords: userData.forgottenWords || [],
-            validatedTypoCount: userData.validatedTypoCount || 0
+        GameLogger.logGameState({
+            type: 'Pre-Save Raw Data',
+            rawVocabulary: userData.vocabulary,
+            vocabularySize: userData.vocabulary.length
         });
-        Cookies.set(USER_COOKIE_KEY, serializedUser, { expires: 365 });
+
+        // Create a clean copy of the vocabulary
+        const uniqueVocabulary = Array.from(
+            new Set(userData.vocabulary.map(w => w.toLowerCase()))
+        );
+
+        // Create a complete new user object
+        const userDataToSave: UserData = {
+            id: userData.id,
+            vocabulary: uniqueVocabulary,
+            forgottenWords: userData.forgottenWords || [],
+            validatedTypoCount: userData.validatedTypoCount || 0,
+            progressFlags: userData.progressFlags || {},
+            isRegistered: userData.isRegistered || false
+        };
+
+        // Log the prepared data
+        GameLogger.logGameState({
+            type: 'Pre-Save Prepared Data',
+            preparedVocabulary: userDataToSave.vocabulary,
+            vocabularySize: userDataToSave.vocabulary.length
+        });
+
+        const serializedUser = JSON.stringify(userDataToSave);
+
+        // Check and log size
+        const dataSize = new Blob([serializedUser]).size;
+        GameLogger.logGameState({
+            type: 'Cookie Size Check',
+            size: dataSize,
+            maxSize: 4096
+        });
+
+        // Only save if we're under size limit
+        if (dataSize <= 4096) {
+            Cookies.remove(USER_COOKIE_KEY); // Clear existing cookie first
+            Cookies.set(USER_COOKIE_KEY, serializedUser, { expires: 365 });
+
+            // Immediate verification
+            const verifyData = Cookies.get(USER_COOKIE_KEY);
+            if (verifyData) {
+                const parsedVerify = JSON.parse(verifyData);
+                const saveSuccessful =
+                    JSON.stringify(parsedVerify.vocabulary.sort()) ===
+                    JSON.stringify(uniqueVocabulary.sort());
+
+                GameLogger.logGameState({
+                    type: 'Save Verification',
+                    expectedSize: uniqueVocabulary.length,
+                    actualSize: parsedVerify.vocabulary.length,
+                    saveSuccessful,
+                    expectedVocabulary: uniqueVocabulary,
+                    actualVocabulary: parsedVerify.vocabulary
+                });
+
+                if (!saveSuccessful) {
+                    GameLogger.logError('saveUser', 'Verification failed - saved data does not match original');
+                }
+            }
+        } else {
+            GameLogger.logError('saveUser', 'Data exceeds cookie size limit');
+        }
     } catch (error) {
-        console.error('Error saving user data to cookie:', error);
+        GameLogger.logError('saveUser', error);
     }
 };
 
-// Update loadUser to ensure these fields are loaded
 export const loadUser = (): UserData | null => {
     try {
         const savedUser = Cookies.get(USER_COOKIE_KEY);
-        if (!savedUser) return null;
+        if (!savedUser) {
+            GameLogger.logError('loadUser', 'No saved user found');
+            return null;
+        }
+
+        GameLogger.logGameState({
+            type: 'Pre-Parse User Data',
+            rawData: savedUser
+        });
 
         const parsedUser = JSON.parse(savedUser);
-        return {
+
+        // Ensure vocabulary is unique and lowercase
+        const cleanedVocabulary = Array.from(
+            new Set(parsedUser.vocabulary.map((w: string) => w.toLowerCase()))
+        );
+
+        const userData = {
             ...parsedUser,
+            vocabulary: cleanedVocabulary,
             forgottenWords: parsedUser.forgottenWords || [],
-            validatedTypoCount: parsedUser.validatedTypoCount || 0,
-            lastLoginDate: new Date(parsedUser.lastLoginDate),
-            createdAt: new Date(parsedUser.createdAt)
+            validatedTypoCount: parsedUser.validatedTypoCount || 0
         };
+
+        GameLogger.logGameState({
+            type: 'Post-Load User Data',
+            vocabularySize: userData.vocabulary.length,
+            vocabulary: userData.vocabulary
+        });
+
+        return userData;
+
     } catch (error) {
-        console.error('Error loading user data from cookie:', error);
+        GameLogger.logError('loadUser', error);
         return null;
     }
 };
-
 // Update specific user fields and save to cookie
 export const updateUser = (updates: Partial<UserData>): UserData => {
     const currentUser = loadUser();
