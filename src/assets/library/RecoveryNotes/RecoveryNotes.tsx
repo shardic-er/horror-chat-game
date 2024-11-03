@@ -2,6 +2,7 @@
 import { Book } from '../../../types/libraryTypes';
 
 export const recoveryNotesBook: Book = {
+    tags:["beginner"],
     title: 'Recovery Notes',
     content: {
         backgroundType: 'note',

@@ -9,7 +9,7 @@ import { ReactComponent as RedApple } from './RedApple.svg';
 
 const ColorsAllAround: Book = {
     title: "Colors All Around",
-    tags:["advanced"],
+    tags:["beginner"],
     content: {
         backgroundType: "book",
         pages: [

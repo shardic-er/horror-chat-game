@@ -3,6 +3,7 @@ import { Book } from '../../../types/libraryTypes';
 
 export const threePigsBook: Book = {
     title: 'Three Little Pigs',
+    tags:["beginner"],
     content: {
         backgroundType: 'book',
         pages: [

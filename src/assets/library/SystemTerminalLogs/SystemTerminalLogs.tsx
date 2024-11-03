@@ -4,6 +4,7 @@ import {ProgressFlag} from "../../../types/gameTypes";
 
 export const systemLogsBook: Book = {
     title: 'System Terminal Logs',
+    tags:["advanced"],
     content: {
         backgroundType: 'terminal',
         pages: [

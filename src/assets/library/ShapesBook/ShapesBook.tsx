@@ -6,6 +6,7 @@ import { ReactComponent as CircleImage } from './CircleImage.svg';
 
 export const shapesBook: Book = {
     title: 'Shapes Around Us',
+    tags:["beginner"],
     content: {
         backgroundType: 'book',
         pages: [

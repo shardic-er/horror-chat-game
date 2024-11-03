@@ -5,6 +5,7 @@ import { ReactComponent as PetsCoverImage } from './PetsCoverImage.svg';
 
 export const petsBook: Book = {
     title: 'My Pets',
+    tags:["beginner"],
     content: {
         backgroundType: 'book',
         pages: [

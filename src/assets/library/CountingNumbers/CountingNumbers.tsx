@@ -7,6 +7,7 @@ import { ReactComponent as TwoCatsImage } from './TwoCatsImage.svg';
 
 export const countingNumbersBook: Book = {
     title: 'Counting Numbers',
+    tags:["beginner"],
     content: {
         backgroundType: 'book',
         pages: [

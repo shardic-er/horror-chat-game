@@ -3,6 +3,7 @@ import { Book } from '../../../types/libraryTypes';
 
 export const transferLetterBook: Book = {
     title: 'Transfer Authorization',
+    tags:["intermediate"],
     content: {
         backgroundType: 'letter',
         pages: [

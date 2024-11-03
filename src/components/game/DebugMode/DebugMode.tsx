@@ -1,3 +1,5 @@
+// src/components/game/DebugMode/DebugMode.tsx
+
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
@@ -14,19 +16,24 @@ interface DebugModeProps {
     anchorRef: React.RefObject<HTMLElement>;
 }
 
-interface ProgressFlagConfig {
-    id: ProgressFlag;
-    label: string;
-    description: string;
-}
+// Helper function to generate human-readable label from enum value
+const getFlagLabel = (flag: string): string => {
+    return flag
+        .split(/(?=[A-Z])/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+};
 
-const PROGRESS_FLAGS: ProgressFlagConfig[] = [
-    {
-        id: ProgressFlag.COMPLETED_DELETIONS,
-        label: 'Completed Deletions',
-        description: 'Marks typo deletion quota as complete (100 deletions)'
-    }
-];
+const getFlagDescription = (flag: ProgressFlag): string => {
+    const descriptions: Record<ProgressFlag, string> = {
+        [ProgressFlag.COMPLETED_DELETIONS]: 'Marks typo deletion quota as complete (100 deletions)',
+        [ProgressFlag.BEGINNER_BOOKS_UNLOCKED]: 'Unlocks access to beginner-level reading materials',
+        [ProgressFlag.BASIC_BOOKS_UNLOCKED]: 'Unlocks access to basic reading materials',
+        [ProgressFlag.INTERMEDIATE_BOOKS_UNLOCKED]: 'Unlocks access to intermediate reading materials',
+        [ProgressFlag.ADVANCED_BOOKS_UNLOCKED]: 'Unlocks access to advanced reading materials',
+    };
+    return descriptions[flag] || `No description available for ${flag}`;
+};
 
 const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) => {
     const dispatch = useAppDispatch();
@@ -87,17 +94,13 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
             const PANEL_WIDTH = 350;
             const PANEL_MARGIN = 10;
 
-            // Position to the right of the button by default
             let left = buttonRect.right + PANEL_MARGIN;
             let top = buttonRect.top;
 
-            // Check if panel would go off screen to the right
             if (left + PANEL_WIDTH > window.innerWidth) {
-                // Position to the left of the button instead
                 left = buttonRect.left - PANEL_WIDTH - PANEL_MARGIN;
             }
 
-            // Ensure panel doesn't go off screen at the bottom
             const PANEL_HEIGHT = Math.min(600, window.innerHeight - 100);
             if (top + PANEL_HEIGHT > window.innerHeight) {
                 top = Math.max(0, window.innerHeight - PANEL_HEIGHT - PANEL_MARGIN);
@@ -114,6 +117,9 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
     }, [isActive, anchorRef]);
 
     if (!isActive) return null;
+
+    // Get all progress flags from the enum
+    const allProgressFlags = Object.values(ProgressFlag);
 
     return createPortal(
         <div className="debug-mode-overlay" onClick={onClose}>
@@ -142,17 +148,19 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
                             <h6 className="mb-0">Progress Flags</h6>
                         </Card.Header>
                         <Card.Body>
-                            {PROGRESS_FLAGS.map(({ id, label, description }) => (
-                                <div key={id} className="d-flex align-items-center gap-2 mb-2">
+                            {allProgressFlags.map((flag) => (
+                                <div key={flag} className="d-flex align-items-center gap-2 mb-2">
                                     <Form.Check
                                         type="switch"
-                                        id={id}
-                                        checked={progressFlags?.[id] ?? false}
-                                        onChange={() => handleFlagToggle(id)}
+                                        id={flag}
+                                        checked={progressFlags?.[flag] ?? false}
+                                        onChange={() => handleFlagToggle(flag)}
                                         label={
                                             <div>
-                                                <span className="me-2">{label}</span>
-                                                <small className="text-muted-light">({description})</small>
+                                                <span className="me-2">{getFlagLabel(flag)}</span>
+                                                <small className="text-muted-light">
+                                                    ({getFlagDescription(flag)})
+                                                </small>
                                             </div>
                                         }
                                         className="text-light"
