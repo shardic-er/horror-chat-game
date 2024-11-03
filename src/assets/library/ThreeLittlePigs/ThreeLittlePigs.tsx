@@ -10,7 +10,7 @@ export const threePigsBook: Book = {
                 text: 'Once upon a time, there were three little pigs. Their mother told them it was time to build their own houses.',
                 image: {
                     type: 'url',
-                    src: '/api/placeholder/400/300', // Assuming placeholder images for now
+                    src: '/api/placeholder/400/300',
                 },
             },
             {
