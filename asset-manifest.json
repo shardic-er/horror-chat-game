@@ -1,8 +1,18 @@
 {
   "files": {
-    "main.css": "/horror-chat-game/static/css/main.f450a3a9.css",
-    "main.js": "/horror-chat-game/static/js/main.914515fb.js",
+    "main.css": "/horror-chat-game/static/css/main.1fff3d84.css",
+    "main.js": "/horror-chat-game/static/js/main.1364b356.js",
     "static/media/IWantToForget.webp": "/horror-chat-game/static/media/IWantToForget.bc4402f6c535273c12b5.webp",
+    "static/media/IDontBelieveInGhosts6.png": "/horror-chat-game/static/media/IDontBelieveInGhosts6.f2228039f34433a43520.png",
+    "static/media/IDontBelieveInGhosts7.png": "/horror-chat-game/static/media/IDontBelieveInGhosts7.e70939a75b5362aeb2bb.png",
+    "static/media/IDontBelieveInGhosts5.png": "/horror-chat-game/static/media/IDontBelieveInGhosts5.29ecb2b87fa7dea07f50.png",
+    "static/media/IDontBelieveInGhosts8.png": "/horror-chat-game/static/media/IDontBelieveInGhosts8.4cb1736b713a23722411.png",
+    "static/media/IDontBelieveInGhosts4.png": "/horror-chat-game/static/media/IDontBelieveInGhosts4.0f09445823f8e427a696.png",
+    "static/media/IDontBelieveInGhosts1.png": "/horror-chat-game/static/media/IDontBelieveInGhosts1.b29e625b190282e55ed4.png",
+    "static/media/IDontBelieveInGhosts3.png": "/horror-chat-game/static/media/IDontBelieveInGhosts3.f0772c120ea97e96d98f.png",
+    "static/media/IDontBelieveInGhosts2.png": "/horror-chat-game/static/media/IDontBelieveInGhosts2.225d7b476ec4548a3dd0.png",
+    "static/media/IDontBelieveInGhosts9.png": "/horror-chat-game/static/media/IDontBelieveInGhosts9.3ca89b12756ccac5cd5a.png",
+    "static/media/IDontBelieveInGhosts10.png": "/horror-chat-game/static/media/IDontBelieveInGhosts10.15c49b6890da80ae6de6.png",
     "static/media/YouLove.svg": "/horror-chat-game/static/media/YouLove.97322e2dea57168b543b01708ee3d96a.svg",
     "static/media/HugLove.svg": "/horror-chat-game/static/media/HugLove.e88101d67ea27b96108c357eb93fe0ee.svg",
     "static/media/DebugModeIcon.svg": "/horror-chat-game/static/media/DebugModeIcon.42b42d34612f12e55d02bd93eec0c68e.svg",
@@ -30,11 +40,11 @@
     "static/media/ChatModeIcon.svg": "/horror-chat-game/static/media/ChatModeIcon.c2b506d0d9533e42757ade547ecc31c7.svg",
     "static/media/ShapesCoverImage.svg": "/horror-chat-game/static/media/ShapesCoverImage.d484f84e69edd0bf68eff2e040014bf5.svg",
     "static/media/ResetChatIcon.svg": "/horror-chat-game/static/media/ResetChatIcon.21daaf21e02cf9af590882c1c70b7d18.svg",
-    "main.f450a3a9.css.map": "/horror-chat-game/static/css/main.f450a3a9.css.map",
-    "main.914515fb.js.map": "/horror-chat-game/static/js/main.914515fb.js.map"
+    "main.1fff3d84.css.map": "/horror-chat-game/static/css/main.1fff3d84.css.map",
+    "main.1364b356.js.map": "/horror-chat-game/static/js/main.1364b356.js.map"
   },
   "entrypoints": [
-    "static/css/main.f450a3a9.css",
-    "static/js/main.914515fb.js"
+    "static/css/main.1fff3d84.css",
+    "static/js/main.1364b356.js"
   ]
 }
