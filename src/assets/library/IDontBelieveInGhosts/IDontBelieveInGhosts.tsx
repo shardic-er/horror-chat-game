@@ -14,6 +14,11 @@ import page10 from './IDontBelieveInGhosts10.png';
 
 const IDontBelieveInGhosts: Book = {
     title: "I Don't Believe in Ghosts!",
+    // beginner (vocabulary < 200 unique words)
+    // basic(200-5000 words)
+    // intermediate(5000-20000)
+    // advanced (+20000)
+    tags:['basic'],
     content: {
         backgroundType: "book",
         pages: [

@@ -2,7 +2,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from '../../types/store.types';
-import { loadUser, saveUser } from '../../services/userService';
+import { loadUser, saveUser} from '../../services/userService';
 import { LLMClient } from '../../services/llmClient';
 import { createTypoValidationService } from '../../services/typoValidationService';
 import { getApiKey } from '../../services/apiKeyService';
@@ -10,6 +10,7 @@ import { ProgressFlag } from '../../types/gameTypes';
 import { updateUserState } from './gameSlice';
 import GameLogger from "../../services/loggerService";
 import { createSelector } from '@reduxjs/toolkit';
+import {initializeProgressFlags} from "../../utils/progressFlags";
 
 export interface VocabularySlice {
     knownWords: string[];
@@ -346,10 +347,10 @@ export const forgetWords = (words: string[]) =>
                     validatedTypoCount: newState.vocabulary.validatedTypoCount,
                     timestamp: new Date().toISOString()
                 });
-
+                const currentFlags = newState.game.currentUser?.progressFlags || initializeProgressFlags();
                 dispatch(updateUserState({
                     progressFlags: {
-                        ...newState.game.currentUser?.progressFlags,
+                        ...currentFlags,
                         [ProgressFlag.COMPLETED_DELETIONS]: true
                     }
                 }));

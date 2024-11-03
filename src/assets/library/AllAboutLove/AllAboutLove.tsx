@@ -14,6 +14,7 @@ import { ReactComponent as BackCover } from './BackCover.svg';
 
 const AllAboutLove: Book = {
     title: "All About Love",
+    tags:["beginner"],
     content: {
         backgroundType: "book",
         pages: [

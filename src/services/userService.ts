@@ -1,9 +1,11 @@
 // src/services/userService.ts
 
-import {ProgressFlag, UserData} from '../types/gameTypes';
+import { UserData} from '../types/gameTypes';
 import Cookies from 'js-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import GameLogger from './loggerService';
+import { migrateUserData, createVersionedUserData, ensureCompleteUserData } from './userMigrationService';
+import {initializeProgressFlags} from "../utils/progressFlags";
 
 export const USER_COOKIE_KEY = 'horror_game_user';
 
@@ -18,23 +20,26 @@ const CACHE_DURATION = 1000; // 1 second;
 const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
 
 // Initialize progress flags with all enum values set to false
-const initializeProgressFlags = (): { [K in ProgressFlag]: boolean } => {
-    const flags = {} as { [K in ProgressFlag]: boolean };
-    Object.values(ProgressFlag).forEach(flag => {
-        flags[flag] = false;
-    });
-    return flags;
-};
+
+
 
 // Create a new user with initial state
-export const createNewUser = (): UserData => ({
-    id: uuidv4(),
-    vocabulary: initialVocabulary,
-    forgottenWords: [],
-    validatedTypoCount: 0,
-    progressFlags: initializeProgressFlags(),
-    isRegistered: false,
-});
+export const createNewUser = (): UserData => {
+    const initialFlags = initializeProgressFlags();
+    return {
+        id: uuidv4(),
+        vocabulary: initialVocabulary,
+        forgottenWords: [],
+        validatedTypoCount: 0,
+        progressFlags: initialFlags,
+        progressStats: {
+            solvedChatMessages: 0,
+            completedBooks: 0
+        },
+        completedContentIds: [],
+        isRegistered: false
+    }
+};
 
 export const saveUser = (userData: UserData): void => {
     try {
@@ -49,24 +54,23 @@ export const saveUser = (userData: UserData): void => {
             new Set(userData.vocabulary.map(w => w.toLowerCase()))
         );
 
-        // Create a complete new user object
-        const userDataToSave: UserData = {
-            id: userData.id,
-            vocabulary: uniqueVocabulary,
-            forgottenWords: userData.forgottenWords || [],
-            validatedTypoCount: userData.validatedTypoCount || 0,
-            progressFlags: userData.progressFlags || {},
-            isRegistered: userData.isRegistered || false
-        };
+        // Create a complete user object with versioning
+        const userDataToSave = ensureCompleteUserData({
+            ...userData,
+            vocabulary: uniqueVocabulary
+        });
+
+        // Create versioned data
+        const versionedData = createVersionedUserData(userDataToSave);
 
         // Log the prepared data
         GameLogger.logGameState({
             type: 'Pre-Save Prepared Data',
-            preparedVocabulary: userDataToSave.vocabulary,
-            vocabularySize: userDataToSave.vocabulary.length
+            preparedVocabulary: versionedData.userData.vocabulary,
+            vocabularySize: versionedData.userData.vocabulary.length
         });
 
-        const serializedUser = JSON.stringify(userDataToSave);
+        const serializedUser = JSON.stringify(versionedData);
 
         // Check and log size
         const dataSize = new Blob([serializedUser]).size;
@@ -82,7 +86,7 @@ export const saveUser = (userData: UserData): void => {
             Cookies.set(USER_COOKIE_KEY, serializedUser, { expires: 365 });
             // Update cache with the saved data
             userDataCache = {
-                data: userDataToSave,
+                data: versionedData.userData,
                 timestamp: Date.now()
             };
         }
@@ -91,7 +95,6 @@ export const saveUser = (userData: UserData): void => {
     }
 };
 
-// Update loadUser to use cache
 export const loadUser = (): UserData | null => {
     const now = Date.now();
 
@@ -107,21 +110,30 @@ export const loadUser = (): UserData | null => {
             return null;
         }
 
-        const parsedUser = JSON.parse(savedUser);
+        const parsedData = JSON.parse(savedUser);
+
+        // Migrate data if necessary
+        const migratedData = migrateUserData(parsedData);
 
         // Ensure vocabulary is unique and lowercase
         const cleanedVocabulary = Array.from(
-            new Set(parsedUser.vocabulary.map((w: string) => w.toLowerCase()))
+            new Set(migratedData.vocabulary.map((w: string) => w.toLowerCase()))
         );
 
-        const userData = {
-            ...parsedUser,
-            vocabulary: cleanedVocabulary,
-            forgottenWords: parsedUser.forgottenWords || [],
-            validatedTypoCount: parsedUser.validatedTypoCount || 0
-        };
+        // Create complete user data
+        const userData = ensureCompleteUserData({
+            ...migratedData,
+            vocabulary: cleanedVocabulary
+        });
 
-        // Update cache
+        // Log the loaded data
+        GameLogger.logGameState({
+            type: 'User Data Loaded',
+            vocabularySize: userData.vocabulary.length,
+            flags: userData.progressFlags,
+            stats: userData.progressStats
+        });
+
         userDataCache = {
             data: userData,
             timestamp: now
@@ -134,7 +146,6 @@ export const loadUser = (): UserData | null => {
         return null;
     }
 };
-
 // Update specific user fields and save to cookie
 export const updateUser = (updates: Partial<UserData>): UserData => {
     const currentUser = loadUser();
@@ -150,7 +161,41 @@ export const updateUser = (updates: Partial<UserData>): UserData => {
     return updatedUser;
 };
 
-// Add a new word to user's vocabulary
+export const updateProgressStats = (
+    contentId: string,
+    contentType: 'book' | 'chat',
+    isComplete: boolean
+): UserData | null => {
+    const currentUser = loadUser();
+    if (!currentUser) return null;
+
+    // Check if already completed to avoid double-counting
+    if (currentUser.completedContentIds.includes(contentId)) {
+        return currentUser;
+    }
+
+    if (isComplete) {
+        const updatedUser = {
+            ...currentUser,
+            completedContentIds: [...currentUser.completedContentIds, contentId],
+            progressStats: {
+                ...currentUser.progressStats,
+                solvedChatMessages: contentType === 'chat'
+                    ? currentUser.progressStats.solvedChatMessages + 1
+                    : currentUser.progressStats.solvedChatMessages,
+                completedBooks: contentType === 'book'
+                    ? currentUser.progressStats.completedBooks + 1
+                    : currentUser.progressStats.completedBooks
+            }
+        };
+        saveUser(updatedUser);
+        return updatedUser;
+    }
+
+    return currentUser;
+};
+
+// Add a new word to user's vocabulary (unused?)
 export const addWordToVocabulary = (word: string): UserData | null => {
     const currentUser = loadUser();
     if (!currentUser) return null;
@@ -167,7 +212,7 @@ export const addWordToVocabulary = (word: string): UserData | null => {
     return currentUser;
 };
 
-// Remove a word from user's vocabulary
+// Remove a word from user's vocabulary (unused?)
 export const removeWordFromVocabulary = (word: string): UserData | null => {
     const currentUser = loadUser();
     if (!currentUser) return null;
@@ -188,7 +233,7 @@ export const removeWordFromVocabulary = (word: string): UserData | null => {
     return currentUser;
 };
 
-// Update a progress flag
+// Update a progress flag (unused?)
 export const updateProgressFlag = (flagKey: string, value: boolean): UserData | null => {
     const currentUser = loadUser();
     if (!currentUser) return null;
@@ -205,12 +250,12 @@ export const updateProgressFlag = (flagKey: string, value: boolean): UserData | 
     return updatedUser;
 };
 
-// Clear user data (logout)
+// Clear user data (logout) (unused?)
 export const clearUserData = (): void => {
     Cookies.remove(USER_COOKIE_KEY);
 };
 
-// Check if user exists
+// Check if user exists (unused?)
 export const userExists = (): boolean => {
     return !!Cookies.get(USER_COOKIE_KEY);
 };

@@ -44,13 +44,34 @@ export interface GameContent {
     content: PaginatedContent | AIPartner;
 }
 
+export type BookDifficulty = 'beginner' | 'basic' | 'intermediate' | 'advanced';
+
 export interface ChatError {
     message: string;
     timestamp: string;
 }
 
+export interface ProgressStats {
+    solvedChatMessages: number;
+    completedBooks: number;
+}
+
 export enum ProgressFlag {
-    COMPLETED_DELETIONS = 'completedDeletions'
+
+    // has completed 100 typo removals
+    COMPLETED_DELETIONS = 'completedDeletions',
+
+    // has completed tutorial
+    BEGINNER_BOOKS_UNLOCKED = 'beginnerBooksUnlocked',
+
+    // vocabulary > 200
+    BASIC_BOOKS_UNLOCKED = 'basicBooksUnlocked',
+
+    // vocabulary > 5000
+    INTERMEDIATE_BOOKS_UNLOCKED = 'intermediateBooksUnlocked',
+
+    // vocabulary > 20000
+    ADVANCED_BOOKS_UNLOCKED = 'advancedBooksUnlocked',
 }
 
 export interface UserData {
@@ -61,10 +82,12 @@ export interface UserData {
     progressFlags: {
         [K in ProgressFlag]: boolean;
     };
+    progressStats: ProgressStats;
     isRegistered: boolean;
     username?: string;
     email?: string;
     currentAiPartner?: string;
+    completedContentIds: string[];
 }
 
 export interface AIPartner {
