@@ -17,6 +17,8 @@ import {
 import { LLMClient } from '../../services/llmClient';
 import { AI_PARTNERS } from '../../config/aiPartners';
 import { getApiKey } from '../../services/apiKeyService';
+import { setProgressFlags } from './vocabularySlice';
+
 
 export interface GameSlice {
     currentUser: UserData | null;
@@ -175,6 +177,11 @@ const gameSlice = createSlice({
                     timestamp: new Date().toISOString()
                 };
                 state.chatState.retryCount += 1;
+            })
+            .addCase(setProgressFlags, (state, action) => {
+                if (state.currentUser) {
+                    state.currentUser.progressFlags = action.payload;
+                }
             });
     }
 });

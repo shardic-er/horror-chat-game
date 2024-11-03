@@ -1,6 +1,6 @@
 // src/store/slices/vocabularySlice.ts
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import {createSlice, createAsyncThunk, PayloadAction, createAction} from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from '../../types/store.types';
 import { loadUser, saveUser} from '../../services/userService';
 import { LLMClient } from '../../services/llmClient';
@@ -206,9 +206,10 @@ export const {
     updateTypoCount
 } = vocabularySlice.actions;
 
-// Thunk for adding new words during gameplay
-// In vocabularySlice.ts
+// Add specific action for updating progress flags
+export const setProgressFlags = createAction<Record<ProgressFlag, boolean>>('vocabulary/setProgressFlags');
 
+// Thunk for adding new words during gameplay
 export const addNewWord = (word: string) =>
     async (dispatch: AppDispatch, getState: () => RootState) => {
         const state = getState();
@@ -218,20 +219,16 @@ export const addNewWord = (word: string) =>
             GameLogger.logWordDiscovery(wordLower, 'Initial discovery');
 
             try {
-                // Always get fresh user data before modifications
                 const currentUser = loadUser();
                 if (!currentUser) {
                     GameLogger.logError('addNewWord', 'No current user found');
                     return;
                 }
 
-                // First handle the base word
                 if (!currentUser.vocabulary.includes(wordLower)) {
-                    // Update Redux
                     dispatch(addWord(wordLower));
                     dispatchWordDiscoveredEvent([wordLower]);
 
-                    // Get variations
                     const variations = await dispatch(getWordVariations(wordLower)).unwrap();
                     GameLogger.logGameState({
                         type: 'Variations Received',
@@ -240,7 +237,6 @@ export const addNewWord = (word: string) =>
                     });
 
                     if (variations?.length > 0) {
-                        // Filter variations against latest user data
                         const newVariations = variations.filter(v => {
                             const varLower = v.toLowerCase();
                             return !currentUser.vocabulary.includes(varLower) &&
@@ -254,20 +250,17 @@ export const addNewWord = (word: string) =>
                         }
                     }
 
-                    // Get fresh state after all dispatches
                     const finalState = getState();
                     const vocabularySize = finalState.vocabulary.knownWords.length;
 
-                    // Get current flags, ensuring all flags have boolean values
-                    const currentFlags = finalState.game.currentUser?.progressFlags || Object.values(ProgressFlag).reduce(
-                        (acc, flag) => ({ ...acc, [flag]: false }),
-                        {} as Record<ProgressFlag, boolean>
-                    );
+                    const currentFlags = finalState.game.currentUser?.progressFlags ||
+                        Object.values(ProgressFlag).reduce(
+                            (acc, flag) => ({ ...acc, [flag]: false }),
+                            {} as Record<ProgressFlag, boolean>
+                        );
 
-                    // Calculate new flags
                     const newFlags = determineBookAccess(vocabularySize, currentFlags);
 
-                    // Check if any flags changed
                     let flagsUpdated = false;
                     const changedFlags: ProgressFlag[] = [];
 
@@ -279,7 +272,6 @@ export const addNewWord = (word: string) =>
                     });
 
                     if (flagsUpdated) {
-                        // Log each newly unlocked flag
                         changedFlags.forEach(flag => {
                             if (newFlags[flag] && !currentFlags[flag]) {
                                 GameLogger.logGameState({
@@ -291,12 +283,24 @@ export const addNewWord = (word: string) =>
                             }
                         });
 
+                        // First update Redux state directly
+                        dispatch(setProgressFlags(newFlags));
+
+                        // Then update user state
                         dispatch(updateUserState({
-                            progressFlags: newFlags
+                            progressFlags: newFlags,
+                            vocabulary: finalState.vocabulary.knownWords
                         }));
+
+                        GameLogger.logGameState({
+                            type: 'Flags Updated',
+                            previousFlags: currentFlags,
+                            newFlags,
+                            changedFlags,
+                            vocabularySize
+                        });
                     }
 
-                    // Get fresh user data again before final save
                     const latestUser = loadUser();
                     if (latestUser) {
                         const updatedUser = {
@@ -314,7 +318,6 @@ export const addNewWord = (word: string) =>
 
                         saveUser(updatedUser);
 
-                        // Verify save
                         const verifyUser = loadUser();
                         GameLogger.logGameState({
                             type: 'Save Verification',
