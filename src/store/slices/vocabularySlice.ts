@@ -26,6 +26,36 @@ export interface MistakeProgress {
     isComplete: boolean;
 }
 
+const VOCABULARY_THRESHOLDS = {
+    BASIC: 200,
+    INTERMEDIATE: 5000,
+    ADVANCED: 20000
+} as const;
+
+// Helper function to determine which book flags should be unlocked
+const determineBookAccess = (vocabularySize: number, currentFlags: Record<ProgressFlag, boolean>): Record<ProgressFlag, boolean> => {
+    // Start with all current flags to maintain existing state
+    const flags: Record<ProgressFlag, boolean> = {
+        ...currentFlags,
+        // Always ensure beginner books are unlocked
+        [ProgressFlag.BEGINNER_BOOKS_UNLOCKED]: true
+    };
+
+    // Set book access based on vocabulary size
+    flags[ProgressFlag.BASIC_BOOKS_UNLOCKED] =
+        vocabularySize >= VOCABULARY_THRESHOLDS.BASIC;
+
+    flags[ProgressFlag.INTERMEDIATE_BOOKS_UNLOCKED] =
+        vocabularySize >= VOCABULARY_THRESHOLDS.INTERMEDIATE;
+
+    flags[ProgressFlag.ADVANCED_BOOKS_UNLOCKED] =
+        vocabularySize >= VOCABULARY_THRESHOLDS.ADVANCED;
+
+    return flags;
+};
+
+
+
 const dispatchWordForgottenEvent = (words: string[]) => {
     const event = new CustomEvent('wordForgotten', {
         detail: { words }
@@ -226,20 +256,60 @@ export const addNewWord = (word: string) =>
 
                     // Get fresh state after all dispatches
                     const finalState = getState();
+                    const vocabularySize = finalState.vocabulary.knownWords.length;
+
+                    // Get current flags, ensuring all flags have boolean values
+                    const currentFlags = finalState.game.currentUser?.progressFlags || Object.values(ProgressFlag).reduce(
+                        (acc, flag) => ({ ...acc, [flag]: false }),
+                        {} as Record<ProgressFlag, boolean>
+                    );
+
+                    // Calculate new flags
+                    const newFlags = determineBookAccess(vocabularySize, currentFlags);
+
+                    // Check if any flags changed
+                    let flagsUpdated = false;
+                    const changedFlags: ProgressFlag[] = [];
+
+                    Object.entries(newFlags).forEach(([flag, value]) => {
+                        if (value !== currentFlags[flag as ProgressFlag]) {
+                            flagsUpdated = true;
+                            changedFlags.push(flag as ProgressFlag);
+                        }
+                    });
+
+                    if (flagsUpdated) {
+                        // Log each newly unlocked flag
+                        changedFlags.forEach(flag => {
+                            if (newFlags[flag] && !currentFlags[flag]) {
+                                GameLogger.logGameState({
+                                    type: 'Book Access Unlocked',
+                                    flag,
+                                    vocabularySize,
+                                    timestamp: new Date().toISOString()
+                                });
+                            }
+                        });
+
+                        dispatch(updateUserState({
+                            progressFlags: newFlags
+                        }));
+                    }
 
                     // Get fresh user data again before final save
                     const latestUser = loadUser();
                     if (latestUser) {
-                        // Merge vocabularies preserving all other user data
                         const updatedUser = {
                             ...latestUser,
-                            vocabulary: finalState.vocabulary.knownWords
+                            vocabulary: finalState.vocabulary.knownWords,
+                            progressFlags: newFlags
                         };
 
                         GameLogger.logGameState({
                             type: 'Pre-Save State',
                             currentWords: latestUser.vocabulary.length,
-                            newWords: finalState.vocabulary.knownWords.length
+                            newWords: finalState.vocabulary.knownWords.length,
+                            updatedFlags: changedFlags
                         });
 
                         saveUser(updatedUser);
