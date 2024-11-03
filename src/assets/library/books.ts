@@ -10,6 +10,7 @@ import { shapesBook } from './ShapesBook/ShapesBook';
 import { petsBook } from './PetsBook/PetsBook';
 import allAboutLove from "./AllAboutLove/AllAboutLove";
 import ColorsAllAround from "./ColorsAllAround/ColorsAllAround";
+import IDontBelieveInGhosts from "./IDontBelieveInGhosts/IDontBelieveInGhosts"
 
 export const libraryContent: Book[] = [
     ColorsAllAround,
@@ -21,4 +22,5 @@ export const libraryContent: Book[] = [
     shapesBook,
     petsBook,
     allAboutLove,
+    IDontBelieveInGhosts,
 ];

@@ -28,6 +28,7 @@ export type PageImage =
 
 export interface PageContent {
     text: string;
+    prompt?: string;
     imageRef?: string;  // Maintain backward compatibility
     image?: PageImage;  // New image handling
     customStyles?: React.CSSProperties;
