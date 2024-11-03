@@ -6,14 +6,15 @@ import VocabularyList from '../../game/VocabularyList/VocabularyList';
 import PageNavigation from '../../game/PageNavigation/PageNavigation';
 import GameMenu from '../../game/GameMenu/GameMenu';
 import LibraryScreen from '../LibraryScreen/LibraryScreen';
-import ForgetScreen from '../ForgetScreen/ForgetScreen';  // Add this import
-import { DisplayMode } from '../../../types/gameTypes';
+import ForgetScreen from '../ForgetScreen/ForgetScreen';
+import { DisplayMode, PageImage } from '../../../types/gameTypes';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { setDisplayMode } from '../../../store/slices/navigationSlice';
 import { Book } from '../../../types/libraryTypes';
-import './GameScreen.styles.css';
 import ChatWindow from "../../game/ChatWindow/ChatWindow";
 import ChatInput from "../../game/ChatInput/ChatInput";
+import ChatMessage from '../../game/ChatWindow/ChatMessage';
+import './GameScreen.styles.css';
 
 const GameScreen: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -22,11 +23,9 @@ const GameScreen: React.FC = () => {
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
     const currentMode = useAppSelector(state => state.navigation.displayMode);
-    const currentPartnerId = useAppSelector(state => state.game.currentPartnerId);
 
     const handleModeSelect = (mode: DisplayMode) => {
         dispatch(setDisplayMode(mode));
-        // Reset selected book if we're leaving reading mode
         if (mode !== 'reading') {
             setSelectedBook(null);
             setCurrentPage(0);
@@ -46,6 +45,22 @@ const GameScreen: React.FC = () => {
         dispatch(setDisplayMode('reading'));
     };
 
+    const renderBookImage = (image: PageImage) => {
+        if (image.type === 'svg') {
+            const SvgComponent = image.component;
+            return <SvgComponent />;
+        } else if (image.type === 'url') {
+            return (
+                <img
+                    src={image.src}
+                    alt={`Page ${currentPage + 1}`}
+                    className="page-image"
+                />
+            );
+        }
+        return null;
+    };
+
     const renderContent = () => {
         switch (currentMode) {
             case 'library':
@@ -57,10 +72,21 @@ const GameScreen: React.FC = () => {
 
             case 'reading':
                 if (!selectedBook) return null;
+                const currentPageContent = selectedBook.content.pages[currentPage];
+                if (!currentPageContent) return null;
+
                 return (
                     <div className={`chat-messages-container ${selectedBook.content.backgroundType}`}>
                         <div className="page-content">
-                            {/* ... existing reading mode content ... */}
+                            {currentPageContent.image && (
+                                <div className="page-image-container">
+                                    {renderBookImage(currentPageContent.image)}
+                                </div>
+                            )}
+                            <ChatMessage
+                                content={currentPageContent.text}
+                                style={currentPageContent.customStyles}
+                            />
                         </div>
                         <PageNavigation
                             currentPage={currentPage}

@@ -4,8 +4,9 @@ import React, { useState, useMemo } from 'react';
 import { Container, Row, Col, Form, Card, Badge } from 'react-bootstrap';
 import { useAppSelector } from '../../../store/hooks';
 import { Book, getUniqueWordCount, getKnownWordCount } from '../../../types/libraryTypes';
-import {libraryContent} from "../../../assets/library/books";
+import { libraryContent } from "../../../assets/library/books";
 import ContentTypeIcon from '../../ContentTypeIcon/ContentTypeIcon';
+import { selectKnownWordsSet } from '../../../store/selectors/vocabularySelectors';
 import './LibraryScreen.styles.css';
 
 interface BookItemProps {
@@ -14,7 +15,7 @@ interface BookItemProps {
     onClick: (book: Book) => void;
 }
 
-const BookItem: React.FC<BookItemProps> = ({ book, knownWords, onClick }) => {
+const BookItem: React.FC<BookItemProps> = React.memo(({ book, knownWords, onClick }) => {
     const uniqueWords = getUniqueWordCount(book.content);
     const knownWordCount = getKnownWordCount(book.content, knownWords);
     const readabilityPercentage = Math.round((knownWordCount / uniqueWords) * 100);
@@ -34,7 +35,7 @@ const BookItem: React.FC<BookItemProps> = ({ book, knownWords, onClick }) => {
                     <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-center">
                             <h5 className="book-title mb-0">{book.title}</h5>
-                            <Badge bg={readabilityPercentage > 80 ? 'success' : 'warning'} style={{color:'black'}}>
+                            <Badge bg={readabilityPercentage > 80 ? 'success' : 'warning'}>
                                 {readabilityPercentage}% Readable
                             </Badge>
                         </div>
@@ -46,22 +47,18 @@ const BookItem: React.FC<BookItemProps> = ({ book, knownWords, onClick }) => {
             </Card.Body>
         </Card>
     );
-};
+});
 
 const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBookSelect }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const knownWords = useAppSelector(state => new Set(state.vocabulary.knownWords.map(w => w.toLowerCase())));
+    const knownWords = useAppSelector(selectKnownWordsSet);
     const progressFlags = useAppSelector(state => state.game.currentUser?.progressFlags);
 
     const availableBooks = useMemo(() => {
         return libraryContent.filter(book => {
-            // Filter by search query
             const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-
-            // Filter by required flags, with proper type checking
             const isUnlocked = !book.requiredFlag ||
                 (progressFlags && progressFlags[book.requiredFlag] === true);
-
             return matchesSearch && isUnlocked;
         });
     }, [searchQuery, progressFlags]);
@@ -72,7 +69,7 @@ const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBoo
                 <Col>
                     <h1 className="library-title">Library</h1>
                     <Form.Control
-                        type="search"
+                        type="text"
                         placeholder="Search books..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
