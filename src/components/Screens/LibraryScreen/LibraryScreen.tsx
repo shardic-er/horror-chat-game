@@ -7,6 +7,7 @@ import { Book, getUniqueWordCount, getKnownWordCount } from '../../../types/libr
 import { libraryContent } from "../../../assets/library/books";
 import ContentTypeIcon from '../../ContentTypeIcon/ContentTypeIcon';
 import { selectKnownWordsSet } from '../../../store/selectors/vocabularySelectors';
+import { isBookAvailable } from '../../../types/libraryTypes';
 import './LibraryScreen.styles.css';
 
 interface BookItemProps {
@@ -42,6 +43,20 @@ const BookItem: React.FC<BookItemProps> = React.memo(({ book, knownWords, onClic
                         <div className="mt-2 word-count">
                             {knownWordCount} / {uniqueWords} words known
                         </div>
+                        {book.tags && book.tags.length > 0 && (
+                            <div className="mt-2 tag-container">
+                                {book.tags.map((tag, index) => (
+                                    <Badge
+                                        key={index}
+                                        bg="info"
+                                        className="me-1 tag-badge"
+                                        style={{ textTransform: 'capitalize' }}
+                                    >
+                                        {tag}
+                                    </Badge>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </Card.Body>
@@ -53,15 +68,43 @@ const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBoo
     const [searchQuery, setSearchQuery] = useState('');
     const knownWords = useAppSelector(selectKnownWordsSet);
     const progressFlags = useAppSelector(state => state.game.currentUser?.progressFlags);
+    const vocabularySize = useAppSelector(state => state.vocabulary.knownWords.length);
 
     const availableBooks = useMemo(() => {
         return libraryContent.filter(book => {
-            const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-            const isUnlocked = !book.requiredFlag ||
+            // Title or tag search
+            const searchTerms = searchQuery.toLowerCase().split(/\s+/);
+            const matchesSearch = searchTerms.every(term => {
+                const matchesTitle = book.title.toLowerCase().includes(term);
+                const matchesTag = book.tags?.some(tag =>
+                    tag.toLowerCase().includes(term)
+                ) || false;
+                return matchesTitle || matchesTag;
+            });
+
+            // Check if book is unlocked based on flags and vocabulary size
+            const isAvailable = !book.tags?.some(tag => {
+                switch (tag) {
+                    case 'beginner':
+                        return !progressFlags?.beginnerBooksUnlocked;
+                    case 'basic':
+                        return !progressFlags?.basicBooksUnlocked && vocabularySize <= 200;
+                    case 'intermediate':
+                        return !progressFlags?.intermediateBooksUnlocked && vocabularySize <= 5000;
+                    case 'advanced':
+                        return !progressFlags?.advancedBooksUnlocked && vocabularySize <= 20000;
+                    default:
+                        return false;
+                }
+            });
+
+            // Check required flag if present
+            const meetsRequiredFlag = !book.requiredFlag ||
                 (progressFlags && progressFlags[book.requiredFlag] === true);
-            return matchesSearch && isUnlocked;
+
+            return matchesSearch && isAvailable && meetsRequiredFlag;
         });
-    }, [searchQuery, progressFlags]);
+    }, [searchQuery, progressFlags, vocabularySize]);
 
     return (
         <Container fluid className="library-screen">
@@ -70,7 +113,7 @@ const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBoo
                     <h1 className="library-title">Library</h1>
                     <Form.Control
                         type="text"
-                        placeholder="Search books..."
+                        placeholder="Search books by title or tags..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="search-input"
