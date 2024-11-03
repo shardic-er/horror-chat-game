@@ -4,6 +4,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from '../../types/store.types';
 import { loadUser, saveUser } from '../../services/userService';
 import { LLMClient } from '../../services/llmClient';
+import { createTypoValidationService } from '../../services/typoValidationService';
 import { getApiKey } from '../../services/apiKeyService';
 import { ProgressFlag } from '../../types/gameTypes';
 import { updateUserState } from './gameSlice';
@@ -262,39 +263,132 @@ export const addNewWord = (word: string) =>
 export const forgetWords = (words: string[]) =>
     async (dispatch: AppDispatch, getState: () => RootState) => {
         const state = getState();
+
+        GameLogger.logGameState({
+            type: 'Forget Words Request',
+            requestedWords: words,
+            currentValidatedTypoCount: state.vocabulary.validatedTypoCount,
+            currentVocabularySize: state.vocabulary.knownWords.length,
+            currentForgottenWordsSize: state.vocabulary.forgottenWords.length,
+            timestamp: new Date().toISOString()
+        });
+
         const wordsToForget = words.filter(word =>
             !state.vocabulary.forgottenWords.includes(word.toLowerCase())
         );
 
-        if (wordsToForget.length === 0) return;
-
-        // Trigger animation
-        dispatchWordForgottenEvent(wordsToForget);
-
-        // Remove words and update state
-        dispatch(removeWords(wordsToForget));
-        dispatch(updateTypoCount(wordsToForget.length));
-
-        // Update progress flag if needed
-        const newState = getState();
-        if (newState.vocabulary.validatedTypoCount >= 100) {
-            dispatch(updateUserState({
-                progressFlags: {
-                    ...newState.game.currentUser?.progressFlags,
-                    [ProgressFlag.COMPLETED_DELETIONS]: true
-                }
-            }));
+        if (wordsToForget.length === 0) {
+            GameLogger.logGameState({
+                type: 'Forget Words Skipped',
+                reason: 'All words already forgotten',
+                requestedWords: words,
+                timestamp: new Date().toISOString()
+            });
+            return;
         }
 
-        // Update cookies
-        const currentUser = loadUser();
-        if (currentUser) {
-            saveUser({
-                ...currentUser,
-                vocabulary: newState.vocabulary.knownWords,
-                forgottenWords: newState.vocabulary.forgottenWords,
-                validatedTypoCount: newState.vocabulary.validatedTypoCount
+        try {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                GameLogger.logError('Forget Words - API Key Missing', new Error('API key not found'));
+                throw new Error('API key not found');
+            }
+
+            const validationService = createTypoValidationService(apiKey);
+
+            GameLogger.logGameState({
+                type: 'Typo Validation Started',
+                wordsToValidate: wordsToForget,
+                timestamp: new Date().toISOString()
             });
+
+            const validationResult = await validationService.validateWords(wordsToForget);
+            const validTypoCount = Object.values(validationResult).filter(isTypo => isTypo).length;
+
+            GameLogger.logGameState({
+                type: 'Typo Validation Complete',
+                wordsChecked: wordsToForget,
+                validationResults: validationResult,
+                validTypoCount,
+                timestamp: new Date().toISOString()
+            });
+
+            // Trigger animation
+            dispatchWordForgottenEvent(wordsToForget);
+
+            // Remove words and update state
+            dispatch(removeWords(wordsToForget));
+
+            if (validTypoCount > 0) {
+                dispatch(updateTypoCount(validTypoCount));
+
+                GameLogger.logGameState({
+                    type: 'Typo Count Updated',
+                    addedCount: validTypoCount,
+                    previousTotal: state.vocabulary.validatedTypoCount,
+                    newTotal: state.vocabulary.validatedTypoCount + validTypoCount,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Check progress flag update
+            const newState = getState();
+            const shouldUpdateFlag =
+                newState.vocabulary.validatedTypoCount >= 100 &&
+                !newState.game.currentUser?.progressFlags[ProgressFlag.COMPLETED_DELETIONS];
+
+            if (shouldUpdateFlag) {
+                GameLogger.logGameState({
+                    type: 'Progress Flag Update',
+                    flag: ProgressFlag.COMPLETED_DELETIONS,
+                    newValue: true,
+                    reason: 'Reached 100 validated typos',
+                    validatedTypoCount: newState.vocabulary.validatedTypoCount,
+                    timestamp: new Date().toISOString()
+                });
+
+                dispatch(updateUserState({
+                    progressFlags: {
+                        ...newState.game.currentUser?.progressFlags,
+                        [ProgressFlag.COMPLETED_DELETIONS]: true
+                    }
+                }));
+            }
+
+            // Update cookies
+            const currentUser = loadUser();
+            if (currentUser) {
+                const updatedUser = {
+                    ...currentUser,
+                    vocabulary: newState.vocabulary.knownWords,
+                    forgottenWords: newState.vocabulary.forgottenWords,
+                    validatedTypoCount: newState.vocabulary.validatedTypoCount
+                };
+
+                GameLogger.logGameState({
+                    type: 'User State Update',
+                    vocabularySize: updatedUser.vocabulary.length,
+                    forgottenWordsSize: updatedUser.forgottenWords.length,
+                    validatedTypoCount: updatedUser.validatedTypoCount,
+                    timestamp: new Date().toISOString()
+                });
+
+                saveUser(updatedUser);
+            }
+
+        } catch (error) {
+            GameLogger.logError('Forget Words Process Error', {
+                error,
+                wordsAttempted: wordsToForget,
+                state: {
+                    vocabularySize: state.vocabulary.knownWords.length,
+                    forgottenWordsSize: state.vocabulary.forgottenWords.length,
+                    validatedTypoCount: state.vocabulary.validatedTypoCount
+                }
+            });
+
+            // In case of error, proceed with deletion but don't increment typo count
+            dispatch(removeWords(wordsToForget));
         }
     };
 
