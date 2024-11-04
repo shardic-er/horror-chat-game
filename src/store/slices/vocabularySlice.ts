@@ -369,7 +369,6 @@ export const forgetWords = (words: string[]) =>
                 }));
             }
 
-            // Update cookies
             const currentUser = loadUser();
             if (currentUser) {
                 const updatedUser = {

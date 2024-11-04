@@ -1,13 +1,11 @@
 // src/services/userService.ts
 
 import { UserData} from '../types/gameTypes';
-import Cookies from 'js-cookie';
 import { v4 as uuidv4 } from 'uuid';
 import GameLogger from './loggerService';
-import { migrateUserData, createVersionedUserData, ensureCompleteUserData } from './userMigrationService';
+import { storage } from "./storageService";
 import {initializeProgressFlags} from "../utils/progressFlags";
 
-export const USER_COOKIE_KEY = 'horror_game_user';
 
 let userDataCache: {
     data: UserData | null;
@@ -20,7 +18,6 @@ const CACHE_DURATION = 1000; // 1 second;
 const initialVocabulary = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
 
 // Initialize progress flags with all enum values set to false
-
 
 
 // Create a new user with initial state
@@ -38,7 +35,7 @@ export const createNewUser = (): UserData => {
         },
         completedContentIds: [],
         isRegistered: false
-    }
+    };
 };
 
 export const saveUser = (userData: UserData): void => {
@@ -54,77 +51,34 @@ export const saveUser = (userData: UserData): void => {
             new Set(userData.vocabulary.map(w => w.toLowerCase()))
         );
 
-        // Create a complete user object with versioning
-        const userDataToSave = ensureCompleteUserData({
+        // Create a complete user object
+        const userDataToSave = {
             ...userData,
             vocabulary: uniqueVocabulary
-        });
-
-        // Create versioned data
-        const versionedData = createVersionedUserData(userDataToSave);
+        };
 
         // Log the prepared data
         GameLogger.logGameState({
             type: 'Pre-Save Prepared Data',
-            preparedVocabulary: versionedData.userData.vocabulary,
-            vocabularySize: versionedData.userData.vocabulary.length
+            preparedVocabulary: userDataToSave.vocabulary,
+            vocabularySize: userDataToSave.vocabulary.length
         });
 
-        const serializedUser = JSON.stringify(versionedData);
+        // Save to storage service
+        storage.updateUserData(userDataToSave);
 
-        // Check and log size
-        const dataSize = new Blob([serializedUser]).size;
-        GameLogger.logGameState({
-            type: 'Cookie Size Check',
-            size: dataSize,
-            maxSize: 4096
-        });
-
-        // Only save if we're under size limit
-        if (dataSize <= 4096) {
-            Cookies.remove(USER_COOKIE_KEY);
-            Cookies.set(USER_COOKIE_KEY, serializedUser, { expires: 365 });
-            // Update cache with the saved data
-            userDataCache = {
-                data: versionedData.userData,
-                timestamp: Date.now()
-            };
-        }
     } catch (error) {
         GameLogger.logError('saveUser', error);
     }
 };
 
 export const loadUser = (): UserData | null => {
-    const now = Date.now();
-
-    // Return cached data if valid
-    if (userDataCache && (now - userDataCache.timestamp < CACHE_DURATION)) {
-        return userDataCache.data;
-    }
-
     try {
-        const savedUser = Cookies.get(USER_COOKIE_KEY);
-        if (!savedUser) {
-            userDataCache = { data: null, timestamp: now };
+        const userData = storage.getUserData();
+
+        if (!userData) {
             return null;
         }
-
-        const parsedData = JSON.parse(savedUser);
-
-        // Migrate data if necessary
-        const migratedData = migrateUserData(parsedData);
-
-        // Ensure vocabulary is unique and lowercase
-        const cleanedVocabulary = Array.from(
-            new Set(migratedData.vocabulary.map((w: string) => w.toLowerCase()))
-        );
-
-        // Create complete user data
-        const userData = ensureCompleteUserData({
-            ...migratedData,
-            vocabulary: cleanedVocabulary
-        });
 
         // Log the loaded data
         GameLogger.logGameState({
@@ -134,11 +88,6 @@ export const loadUser = (): UserData | null => {
             stats: userData.progressStats
         });
 
-        userDataCache = {
-            data: userData,
-            timestamp: now
-        };
-
         return userData;
 
     } catch (error) {
@@ -146,15 +95,16 @@ export const loadUser = (): UserData | null => {
         return null;
     }
 };
-// Update specific user fields and save to cookie
+
+
+// Update specific user fields
 export const updateUser = (updates: Partial<UserData>): UserData => {
     const currentUser = loadUser();
     if (!currentUser) throw new Error('No user found');
 
     const updatedUser = {
         ...currentUser,
-        ...updates,
-        lastLoginDate: new Date()
+        ...updates
     };
 
     saveUser(updatedUser);
@@ -250,12 +200,13 @@ export const updateProgressFlag = (flagKey: string, value: boolean): UserData | 
     return updatedUser;
 };
 
-// Clear user data (logout) (unused?)
 export const clearUserData = (): void => {
-    Cookies.remove(USER_COOKIE_KEY);
+    storage.clearAll();
 };
 
 // Check if user exists (unused?)
 export const userExists = (): boolean => {
-    return !!Cookies.get(USER_COOKIE_KEY);
+    return storage.getUserData() !== null;
 };
+
+

@@ -1,14 +1,15 @@
-import Cookies from 'js-cookie';
-import OpenAI from 'openai';
+// src/services/apiKeyService.ts
 
-const API_KEY_COOKIE = 'horror_game_api_key';
+import OpenAI from "openai";
+
+const API_KEY_STORAGE_KEY = 'horror_game_api_key';
 
 export const saveApiKey = (apiKey: string): void => {
-    Cookies.set(API_KEY_COOKIE, apiKey, { expires: 365 });
+    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
 };
 
 export const getApiKey = (): string | undefined => {
-    return Cookies.get(API_KEY_COOKIE);
+    return localStorage.getItem(API_KEY_STORAGE_KEY) || undefined;
 };
 
 export const validateApiKey = async (apiKey: string): Promise<boolean> => {
@@ -24,7 +25,7 @@ export const validateApiKey = async (apiKey: string): Promise<boolean> => {
 
     try {
         const response = await client.chat.completions.create({
-            model: "gpt-3.5-turbo",  // Using 3.5-turbo as it's more widely available
+            model: "gpt-3.5-turbo",
             messages: [{
                 role: "user",
                 content: "Hello"
@@ -41,4 +42,8 @@ export const validateApiKey = async (apiKey: string): Promise<boolean> => {
         });
         return false;
     }
+};
+
+export const clearApiKey = (): void => {
+    localStorage.removeItem(API_KEY_STORAGE_KEY);
 };

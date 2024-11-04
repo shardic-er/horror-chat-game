@@ -1,6 +1,7 @@
 // src/services/storageService.ts
 
 import { UserData, ProgressFlag } from '../types/gameTypes';
+import GameLogger from "./loggerService";
 
 const INITIAL_VOCABULARY = ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
 
@@ -77,17 +78,29 @@ export class StorageService {
         try {
             localStorage.setItem(key, JSON.stringify(value));
         } catch (error) {
-            console.error(`Failed to store data for key: ${key}`, error);
-            throw error;
+            this.handleStorageError(error as Error, `setItem: ${key}`);
         }
     }
 
     getItem<T>(key: StorageKey): T | null {
         try {
             const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : null;
+            if (!item) return null;
+
+            const data = JSON.parse(item);
+
+            // Basic validation
+            if (typeof data !== 'object' || data === null) {
+                throw new Error('Invalid data format');
+            }
+
+            return data;
         } catch (error) {
-            console.error(`Failed to retrieve data for key: ${key}`, error);
+            GameLogger.logError('Data Corruption', {
+                key,
+                error
+            });
+            // Consider data recovery or reset
             return null;
         }
     }
@@ -188,6 +201,25 @@ export class StorageService {
     getVocabularyWithFallback(): string[] {
         const vocab = this.getVocabulary();
         return vocab.length > 0 ? vocab : INITIAL_VOCABULARY;
+    }
+
+    // Add to StorageService
+    private handleStorageError(error: Error, operation: string): void {
+        if (error.name === 'QuotaExceededError') {
+            GameLogger.logError('Storage Quota Exceeded', {
+                operation,
+                error
+            });
+            // Consider implementing data cleanup or compression
+            throw new Error('Storage full - please contact support');
+        }
+        throw error;
+    }
+
+    // Add to StorageService
+    private validateData<T>(data: T, schema: Record<string, any>): boolean {
+        const requiredKeys = Object.keys(schema);
+        return requiredKeys.every(key => key in (data as object));
     }
 }
 
