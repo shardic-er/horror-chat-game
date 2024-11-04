@@ -80,19 +80,15 @@ export const getWordVariations = createAsyncThunk(
         if (!apiKey) throw new Error('API key not found');
 
         const llmClient = new LLMClient(apiKey);
-        const prompt = `Given the word "${word}", provide a JSON array of only the most common and natural variations that would appear in everyday English. Focus on:
-- Regular plural forms (if a noun)
-- Possessive forms (if a noun)
-- Present/past tense (if a verb)
-- Common derived forms
-Do not include rare or uncommon variations. Format as JSON array.`;
+        const systemPrompt = `You are a linguistic assistant. Given a word, respond only with a JSON array of its most common and natural inflections or derived forms based on its primary part of speech (verb, noun, adjective, or adverb). Do not include synonyms or related words. Focus on relevant forms such as plurals for nouns, tenses for verbs, comparative/superlative for adjectives, and standard variations for adverbs. Exclude rare or uncommon forms.`
+        const prompt = `Given the word "${word}", provide a JSON array of its common and natural variations according to the instructions.`
 
         try {
             const response = await llmClient.generateResponse(
                 {
                     id: 'vocabulary',
                     name: 'VOCABULARY',
-                    systemPrompt: 'You are a linguistic assistant. Respond only with a JSON array of common word variations.',
+                    systemPrompt: systemPrompt,
                     maxInputTokens: 100,
                     maxOutputTokens: 100,
                     temperature: 0.1
