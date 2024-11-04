@@ -12,6 +12,8 @@ import allAboutLove from "./AllAboutLove/AllAboutLove";
 import ColorsAllAround from "./ColorsAllAround/ColorsAllAround";
 import IDontBelieveInGhosts from "./IDontBelieveInGhosts/IDontBelieveInGhosts"
 import NervousMervis from "./NervousMervis/NervousMervis";
+import YouCantGoBack from "./YouCantGoBack/YouCantGoBack";
+import ILoveYouGoodbye from "./ILoveYouGoodbye/ILoveYouGoodbye";
 
 export const libraryContent: Book[] = [
     ColorsAllAround,
@@ -25,4 +27,6 @@ export const libraryContent: Book[] = [
     allAboutLove,
     IDontBelieveInGhosts,
     NervousMervis,
+    YouCantGoBack,
+    ILoveYouGoodbye,
 ];
