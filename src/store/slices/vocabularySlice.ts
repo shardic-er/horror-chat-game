@@ -1,6 +1,6 @@
 // src/store/slices/vocabularySlice.ts
 
-import {createSlice, createAsyncThunk, PayloadAction, createAction} from '@reduxjs/toolkit';
+import {createSlice, createAsyncThunk, createAction} from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from '../../types/store.types';
 import { loadUser, saveUser} from '../../services/userService';
 import { LLMClient } from '../../services/llmClient';
@@ -10,7 +10,10 @@ import { ProgressFlag } from '../../types/gameTypes';
 import { updateUserState } from './gameSlice';
 import GameLogger from "../../services/loggerService";
 import { createSelector } from '@reduxjs/toolkit';
-import {initializeProgressFlags} from "../../utils/progressFlags";
+import { storage } from '../../services/storageService';
+import { initializeProgressFlags, ensureCompleteFlags } from '../../utils/progressFlags';
+
+
 
 export interface VocabularySlice {
     knownWords: string[];
@@ -32,16 +35,29 @@ const VOCABULARY_THRESHOLDS = {
     ADVANCED: 20000
 } as const;
 
-// Helper function to determine which book flags should be unlocked
-const determineBookAccess = (vocabularySize: number, currentFlags: Record<ProgressFlag, boolean>): Record<ProgressFlag, boolean> => {
-    // Start with all current flags to maintain existing state
-    const flags: Record<ProgressFlag, boolean> = {
-        ...currentFlags,
-        // Always ensure beginner books are unlocked
-        [ProgressFlag.BEGINNER_BOOKS_UNLOCKED]: true
-    };
+// Initialize state from storage
+const getInitialState = (): VocabularySlice => {
+    const knownWords = storage.getVocabularyWithFallback();
+    const userData = storage.getUserData();
 
-    // Set book access based on vocabulary size
+    return {
+        knownWords,
+        forgottenWords: userData?.forgottenWords || [],
+        validatedTypoCount: userData?.validatedTypoCount || 0,
+        wordLimit: calculateWordLimit(knownWords.length),
+        isProcessingVariations: false
+    };
+};
+
+// Helper function to determine which book flags should be unlocked
+const determineBookAccess = (
+    vocabularySize: number,
+    currentFlags: Partial<Record<ProgressFlag, boolean>>
+): Record<ProgressFlag, boolean> => {
+    // Start with a complete set of flags
+    const flags = ensureCompleteFlags(currentFlags);
+
+    // Update flags based on vocabulary size
     flags[ProgressFlag.BASIC_BOOKS_UNLOCKED] =
         vocabularySize >= VOCABULARY_THRESHOLDS.BASIC;
 
@@ -53,8 +69,6 @@ const determineBookAccess = (vocabularySize: number, currentFlags: Record<Progre
 
     return flags;
 };
-
-
 
 const dispatchWordForgottenEvent = (words: string[]) => {
     const event = new CustomEvent('wordForgotten', {
@@ -144,43 +158,47 @@ const initialState: VocabularySlice = {
 
 const vocabularySlice = createSlice({
     name: 'vocabulary',
-    initialState,
+    initialState: getInitialState(),
     reducers: {
-        addWord: (state, action: PayloadAction<string>) => {
+        addWord: (state, action) => {
             const word = action.payload.toLowerCase();
             if (!state.knownWords.includes(word)) {
                 state.knownWords.push(word);
                 state.wordLimit = calculateWordLimit(state.knownWords.length);
-                GameLogger.logGameState({
-                    type: 'Redux State Update - addWord',
-                    knownWords: state.knownWords
-                });
+                storage.setVocabulary(state.knownWords);
             }
         },
-        addWords: (state, action: PayloadAction<string[]>) => {
+        addWords: (state, action) => {
             const newWords = action.payload
-                .map(w => w.toLowerCase())
-                .filter(w => !state.knownWords.includes(w));
+                .map((w: string) => w.toLowerCase())
+                .filter((w: string) => !state.knownWords.includes(w));
 
             if (newWords.length > 0) {
                 state.knownWords.push(...newWords);
                 state.wordLimit = calculateWordLimit(state.knownWords.length);
-                GameLogger.logGameState({
-                    type: 'Redux State Update - addWords',
-                    knownWords: state.knownWords
-                });
+                storage.setVocabulary(state.knownWords);
             }
         },
-        removeWords: (state, action: PayloadAction<string[]>) => {
-            const wordsToRemove = action.payload.map(w => w.toLowerCase());
+        removeWords: (state, action) => {
+            const wordsToRemove = action.payload.map((w: string) => w.toLowerCase());
             state.knownWords = state.knownWords.filter(word =>
                 !wordsToRemove.includes(word.toLowerCase())
             );
             state.forgottenWords.push(...wordsToRemove);
             state.wordLimit = calculateWordLimit(state.knownWords.length);
+
+            // Update storage
+            storage.setVocabulary(state.knownWords);
+            storage.setForgottenWords(state.forgottenWords);
         },
-        updateTypoCount: (state, action: PayloadAction<number>) => {
+        updateTypoCount: (state, action) => {
             state.validatedTypoCount = Math.min(100, state.validatedTypoCount + action.payload);
+            // Update user data in storage
+            const userData = storage.getItem<any>('horror_game_user_data') || {};
+            storage.setItem('horror_game_user_data', {
+                ...userData,
+                validatedTypoCount: state.validatedTypoCount
+            });
         }
     }
 });
@@ -215,114 +233,40 @@ export const addNewWord = (word: string) =>
             GameLogger.logWordDiscovery(wordLower, 'Initial discovery');
 
             try {
-                const currentUser = loadUser();
-                if (!currentUser) {
-                    GameLogger.logError('addNewWord', 'No current user found');
-                    return;
-                }
+                dispatch(addWord(wordLower));
+                dispatchWordDiscoveredEvent([wordLower]);
 
-                if (!currentUser.vocabulary.includes(wordLower)) {
-                    dispatch(addWord(wordLower));
-                    dispatchWordDiscoveredEvent([wordLower]);
+                const variations = await dispatch(getWordVariations(wordLower)).unwrap();
 
-                    const variations = await dispatch(getWordVariations(wordLower)).unwrap();
-                    GameLogger.logGameState({
-                        type: 'Variations Received',
-                        baseWord: wordLower,
-                        variations
+                if (variations?.length > 0) {
+                    const newVariations = variations.filter(v => {
+                        const varLower = v.toLowerCase();
+                        return !state.vocabulary.knownWords.includes(varLower) &&
+                            varLower !== wordLower;
                     });
 
-                    if (variations?.length > 0) {
-                        const newVariations = variations.filter(v => {
-                            const varLower = v.toLowerCase();
-                            return !currentUser.vocabulary.includes(varLower) &&
-                                varLower !== wordLower;
-                        });
-
-                        if (newVariations.length > 0) {
-                            GameLogger.logVariationDiscovery(wordLower, newVariations);
-                            dispatch(addWords(newVariations));
-                            dispatchWordDiscoveredEvent(newVariations);
-                        }
-                    }
-
-                    const finalState = getState();
-                    const vocabularySize = finalState.vocabulary.knownWords.length;
-
-                    const currentFlags = finalState.game.currentUser?.progressFlags ||
-                        Object.values(ProgressFlag).reduce(
-                            (acc, flag) => ({ ...acc, [flag]: false }),
-                            {} as Record<ProgressFlag, boolean>
-                        );
-
-                    const newFlags = determineBookAccess(vocabularySize, currentFlags);
-
-                    let flagsUpdated = false;
-                    const changedFlags: ProgressFlag[] = [];
-
-                    Object.entries(newFlags).forEach(([flag, value]) => {
-                        if (value !== currentFlags[flag as ProgressFlag]) {
-                            flagsUpdated = true;
-                            changedFlags.push(flag as ProgressFlag);
-                        }
-                    });
-
-                    if (flagsUpdated) {
-                        changedFlags.forEach(flag => {
-                            if (newFlags[flag] && !currentFlags[flag]) {
-                                GameLogger.logGameState({
-                                    type: 'Book Access Unlocked',
-                                    flag,
-                                    vocabularySize,
-                                    timestamp: new Date().toISOString()
-                                });
-                            }
-                        });
-
-                        // First update Redux state directly
-                        dispatch(setProgressFlags(newFlags));
-
-                        // Then update user state
-                        dispatch(updateUserState({
-                            progressFlags: newFlags,
-                            vocabulary: finalState.vocabulary.knownWords
-                        }));
-
-                        GameLogger.logGameState({
-                            type: 'Flags Updated',
-                            previousFlags: currentFlags,
-                            newFlags,
-                            changedFlags,
-                            vocabularySize
-                        });
-                    }
-
-                    const latestUser = loadUser();
-                    if (latestUser) {
-                        const updatedUser = {
-                            ...latestUser,
-                            vocabulary: finalState.vocabulary.knownWords,
-                            progressFlags: newFlags
-                        };
-
-                        GameLogger.logGameState({
-                            type: 'Pre-Save State',
-                            currentWords: latestUser.vocabulary.length,
-                            newWords: finalState.vocabulary.knownWords.length,
-                            updatedFlags: changedFlags
-                        });
-
-                        saveUser(updatedUser);
-
-                        const verifyUser = loadUser();
-                        GameLogger.logGameState({
-                            type: 'Save Verification',
-                            expectedWords: finalState.vocabulary.knownWords.length,
-                            actualWords: verifyUser?.vocabulary.length || 0,
-                            successful: verifyUser?.vocabulary.length === finalState.vocabulary.knownWords.length
-                        });
+                    if (newVariations.length > 0) {
+                        dispatch(addWords(newVariations));
+                        dispatchWordDiscoveredEvent(newVariations);
                     }
                 }
+
+                const finalState = getState();
+                const vocabularySize = finalState.vocabulary.knownWords.length;
+                const currentFlags = finalState.game.currentUser?.progressFlags || initializeProgressFlags();
+
+                const newFlags = determineBookAccess(vocabularySize, currentFlags);
+
+                if (JSON.stringify(newFlags) !== JSON.stringify(currentFlags)) {
+                    dispatch(setProgressFlags(newFlags));
+                    dispatch(updateUserState({ progressFlags: newFlags }));
+                }
+
+                storage.updateUserData({
+                    vocabulary: finalState.vocabulary.knownWords,
+                    progressFlags: newFlags
+                });
+
             } catch (error) {
                 GameLogger.logError('addNewWord', error);
             }

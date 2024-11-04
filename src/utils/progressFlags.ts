@@ -1,14 +1,23 @@
 import {ProgressFlag} from "../types/gameTypes";
 
-export const initializeProgressFlags = (): { [K in ProgressFlag]: boolean } => {
-    const flags = {} as { [K in ProgressFlag]: boolean };
-    Object.values(ProgressFlag).forEach(flag => {
-        flags[flag as ProgressFlag] = false;
+// Helper function to initialize progress flags with all required values
+export const initializeProgressFlags = (): Record<ProgressFlag, boolean> => {
+    return {
+        [ProgressFlag.COMPLETED_DELETIONS]: false,
+        [ProgressFlag.BEGINNER_BOOKS_UNLOCKED]: true, // This starts as true
+        [ProgressFlag.BASIC_BOOKS_UNLOCKED]: false,
+        [ProgressFlag.INTERMEDIATE_BOOKS_UNLOCKED]: false,
+        [ProgressFlag.ADVANCED_BOOKS_UNLOCKED]: false,
+    };
+};
 
-    });
-
-    // For new users, beginner books are initially available
-    flags[ProgressFlag.BEGINNER_BOOKS_UNLOCKED] = true;
-    return flags;
-
+// Helper to ensure all flags are present
+export const ensureCompleteFlags = (
+    flags: Partial<Record<ProgressFlag, boolean>>
+): Record<ProgressFlag, boolean> => {
+    const completeFlags = initializeProgressFlags();
+    return {
+        ...completeFlags,
+        ...flags
+    };
 };
