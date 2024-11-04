@@ -2,13 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import { Container, Row, Col, Form, Card, Badge } from 'react-bootstrap';
-import { useAppSelector } from '../../../store/hooks';
+import {useAppDispatch, useAppSelector} from '../../../store/hooks';
 import { Book, getUniqueWordCount, getKnownWordCount } from '../../../types/libraryTypes';
 import { libraryContent } from "../../../assets/library/books";
 import ContentTypeIcon from '../../ContentTypeIcon/ContentTypeIcon';
 import { selectKnownWordsSet } from '../../../store/selectors/vocabularySelectors';
-import { isBookAvailable } from '../../../types/libraryTypes';
 import './LibraryScreen.styles.css';
+import {updateUserState} from "../../../store/slices/gameSlice";
+import {isBookComplete} from "../../../services/completionService";
 
 interface BookItemProps {
     book: Book;
@@ -17,13 +18,15 @@ interface BookItemProps {
 }
 
 const BookItem: React.FC<BookItemProps> = React.memo(({ book, knownWords, onClick }) => {
+    const completedContentIds = useAppSelector(state => state.game.currentUser?.completedContentIds || []);
     const uniqueWords = getUniqueWordCount(book.content);
     const knownWordCount = getKnownWordCount(book.content, knownWords);
     const readabilityPercentage = Math.round((knownWordCount / uniqueWords) * 100);
+    const isCompleted = completedContentIds.includes(book.title);
 
     return (
         <Card
-            className="book-item mb-3"
+            className={`book-item mb-3 ${isCompleted ? 'completed' : ''}`}
             onClick={() => onClick(book)}
             role="button"
         >
@@ -35,7 +38,10 @@ const BookItem: React.FC<BookItemProps> = React.memo(({ book, knownWords, onClic
                     />
                     <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-center">
-                            <h5 className="book-title mb-0">{book.title}</h5>
+                            <h5 className="book-title mb-0">
+                                {book.title}
+                                {isCompleted && <span className="ms-2">✓</span>}
+                            </h5>
                             <Badge bg={readabilityPercentage > 80 ? 'success' : 'warning'}>
                                 {readabilityPercentage}% Readable
                             </Badge>
@@ -65,10 +71,29 @@ const BookItem: React.FC<BookItemProps> = React.memo(({ book, knownWords, onClic
 });
 
 const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBookSelect }) => {
+    const dispatch = useAppDispatch();
     const [searchQuery, setSearchQuery] = useState('');
     const knownWords = useAppSelector(selectKnownWordsSet);
     const progressFlags = useAppSelector(state => state.game.currentUser?.progressFlags);
     const vocabularySize = useAppSelector(state => state.vocabulary.knownWords.length);
+    const currentUser = useAppSelector(state => state.game.currentUser);
+
+    const handleBookSelect = (book: Book) => {
+        // Check if book is complete
+        const knownWordsSet = new Set(knownWords);
+        if (isBookComplete(book, knownWordsSet) &&
+            !currentUser?.completedContentIds.includes(book.title)) {
+
+            dispatch(updateUserState({
+                completedContentIds: [...(currentUser?.completedContentIds || []), book.title],
+                progressStats: {
+                    solvedChatMessages: currentUser?.progressStats.solvedChatMessages || 0,
+                    completedBooks: (currentUser?.progressStats.completedBooks || 0) + 1
+                }
+            }));
+        }
+        onBookSelect(book);
+    };
 
     const availableBooks = useMemo(() => {
         return libraryContent.filter(book => {
@@ -128,7 +153,7 @@ const LibraryScreen: React.FC<{ onBookSelect: (book: Book) => void }> = ({ onBoo
                                 key={book.title}
                                 book={book}
                                 knownWords={knownWords}
-                                onClick={onBookSelect}
+                                onClick={handleBookSelect}
                             />
                         ))}
                         {availableBooks.length === 0 && (

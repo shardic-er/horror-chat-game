@@ -176,3 +176,12 @@
     cursor: pointer;
     opacity: 0.9;
 }
+
+.book-item.completed {
+    border-color: var(--bs-success) !important;
+}
+
+.book-item.completed:hover {
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2) !important;
+    transform: translateY(0px) !important;
+}
