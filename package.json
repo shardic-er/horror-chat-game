@@ -4,6 +4,8 @@
   "private": true,
   "homepage": "https://shardic-er.github.io/horror-chat-game",
   "dependencies": {
+    "@babel/parser": "^7.26.2",
+    "@babel/traverse": "^7.25.9",
     "@reduxjs/toolkit": "^2.3.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -13,6 +15,7 @@
     "@types/node": "^16.18.115",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "js-cookie": "^3.0.5",
     "openai": "^4.68.4",
