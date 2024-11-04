@@ -11,7 +11,7 @@
 
 .debug-mode-panel {
     position: absolute;
-    width: 350px;
+    width: 30rem;
     background: rgba(33, 37, 41, 0.95);
     border: 1px solid var(--bs-danger);
     border-radius: 8px;
@@ -96,6 +96,10 @@
     background-color: rgba(0, 0, 0, 0.2);
     border-color: rgba(220, 53, 69, 0.3);
     color: white;
+}
+
+.debug-mode-content .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .debug-mode-content .form-control:focus {
