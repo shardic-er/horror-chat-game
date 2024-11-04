@@ -1,17 +1,27 @@
 {
   "files": {
-    "main.css": "/horror-chat-game/static/css/main.219dc0b5.css",
-    "main.js": "/horror-chat-game/static/js/main.1b52d064.js",
+    "main.css": "/horror-chat-game/static/css/main.f0b8b0c1.css",
+    "main.js": "/horror-chat-game/static/js/main.2ec4bd86.js",
     "static/media/IWantToForget.webp": "/horror-chat-game/static/media/IWantToForget.bc4402f6c535273c12b5.webp",
+    "static/media/NervousMervis3.png": "/horror-chat-game/static/media/NervousMervis3.dd1f0466173406fab6e3.png",
+    "static/media/NervousMervis6.png": "/horror-chat-game/static/media/NervousMervis6.0b6f47213f44c7e6d822.png",
+    "static/media/NervousMervis5.png": "/horror-chat-game/static/media/NervousMervis5.83f3c0326ca5b4225895.png",
+    "static/media/NervousMervis2.png": "/horror-chat-game/static/media/NervousMervis2.99247e5e71b6624a8617.png",
     "static/media/IDontBelieveInGhosts6.png": "/horror-chat-game/static/media/IDontBelieveInGhosts6.f2228039f34433a43520.png",
     "static/media/IDontBelieveInGhosts7.png": "/horror-chat-game/static/media/IDontBelieveInGhosts7.e70939a75b5362aeb2bb.png",
+    "static/media/NervousMervis7.png": "/horror-chat-game/static/media/NervousMervis7.c29efd3ba9a2803317ac.png",
     "static/media/IDontBelieveInGhosts5.png": "/horror-chat-game/static/media/IDontBelieveInGhosts5.29ecb2b87fa7dea07f50.png",
     "static/media/IDontBelieveInGhosts8.png": "/horror-chat-game/static/media/IDontBelieveInGhosts8.4cb1736b713a23722411.png",
     "static/media/IDontBelieveInGhosts4.png": "/horror-chat-game/static/media/IDontBelieveInGhosts4.0f09445823f8e427a696.png",
     "static/media/IDontBelieveInGhosts1.png": "/horror-chat-game/static/media/IDontBelieveInGhosts1.b29e625b190282e55ed4.png",
+    "static/media/NervousMervis8.png": "/horror-chat-game/static/media/NervousMervis8.0e3edff47047e6b464ac.png",
     "static/media/IDontBelieveInGhosts3.png": "/horror-chat-game/static/media/IDontBelieveInGhosts3.f0772c120ea97e96d98f.png",
+    "static/media/NervousMervis1.png": "/horror-chat-game/static/media/NervousMervis1.b11e402d4d99f2b5d7e8.png",
+    "static/media/NervousMervis4.png": "/horror-chat-game/static/media/NervousMervis4.f897d77d605ba40d0200.png",
+    "static/media/NervousMervis10.png": "/horror-chat-game/static/media/NervousMervis10.52e8804c557b43ab3012.png",
     "static/media/IDontBelieveInGhosts2.png": "/horror-chat-game/static/media/IDontBelieveInGhosts2.225d7b476ec4548a3dd0.png",
     "static/media/IDontBelieveInGhosts9.png": "/horror-chat-game/static/media/IDontBelieveInGhosts9.3ca89b12756ccac5cd5a.png",
+    "static/media/NervousMervis9.png": "/horror-chat-game/static/media/NervousMervis9.dbb44a9e505c2223ddbf.png",
     "static/media/IDontBelieveInGhosts10.png": "/horror-chat-game/static/media/IDontBelieveInGhosts10.15c49b6890da80ae6de6.png",
     "static/media/YouLove.svg": "/horror-chat-game/static/media/YouLove.97322e2dea57168b543b01708ee3d96a.svg",
     "static/media/HugLove.svg": "/horror-chat-game/static/media/HugLove.e88101d67ea27b96108c357eb93fe0ee.svg",
@@ -40,11 +50,11 @@
     "static/media/ChatModeIcon.svg": "/horror-chat-game/static/media/ChatModeIcon.c2b506d0d9533e42757ade547ecc31c7.svg",
     "static/media/ShapesCoverImage.svg": "/horror-chat-game/static/media/ShapesCoverImage.d484f84e69edd0bf68eff2e040014bf5.svg",
     "static/media/ResetChatIcon.svg": "/horror-chat-game/static/media/ResetChatIcon.21daaf21e02cf9af590882c1c70b7d18.svg",
-    "main.219dc0b5.css.map": "/horror-chat-game/static/css/main.219dc0b5.css.map",
-    "main.1b52d064.js.map": "/horror-chat-game/static/js/main.1b52d064.js.map"
+    "main.f0b8b0c1.css.map": "/horror-chat-game/static/css/main.f0b8b0c1.css.map",
+    "main.2ec4bd86.js.map": "/horror-chat-game/static/js/main.2ec4bd86.js.map"
   },
   "entrypoints": [
-    "static/css/main.219dc0b5.css",
-    "static/js/main.1b52d064.js"
+    "static/css/main.f0b8b0c1.css",
+    "static/js/main.2ec4bd86.js"
   ]
 }
