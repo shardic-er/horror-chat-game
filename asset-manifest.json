@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/horror-chat-game/static/css/main.1fff3d84.css",
-    "main.js": "/horror-chat-game/static/js/main.168ff893.js",
+    "main.css": "/horror-chat-game/static/css/main.219dc0b5.css",
+    "main.js": "/horror-chat-game/static/js/main.1b52d064.js",
     "static/media/IWantToForget.webp": "/horror-chat-game/static/media/IWantToForget.bc4402f6c535273c12b5.webp",
     "static/media/IDontBelieveInGhosts6.png": "/horror-chat-game/static/media/IDontBelieveInGhosts6.f2228039f34433a43520.png",
     "static/media/IDontBelieveInGhosts7.png": "/horror-chat-game/static/media/IDontBelieveInGhosts7.e70939a75b5362aeb2bb.png",
@@ -40,11 +40,11 @@
     "static/media/ChatModeIcon.svg": "/horror-chat-game/static/media/ChatModeIcon.c2b506d0d9533e42757ade547ecc31c7.svg",
     "static/media/ShapesCoverImage.svg": "/horror-chat-game/static/media/ShapesCoverImage.d484f84e69edd0bf68eff2e040014bf5.svg",
     "static/media/ResetChatIcon.svg": "/horror-chat-game/static/media/ResetChatIcon.21daaf21e02cf9af590882c1c70b7d18.svg",
-    "main.1fff3d84.css.map": "/horror-chat-game/static/css/main.1fff3d84.css.map",
-    "main.168ff893.js.map": "/horror-chat-game/static/js/main.168ff893.js.map"
+    "main.219dc0b5.css.map": "/horror-chat-game/static/css/main.219dc0b5.css.map",
+    "main.1b52d064.js.map": "/horror-chat-game/static/js/main.1b52d064.js.map"
   },
   "entrypoints": [
-    "static/css/main.1fff3d84.css",
-    "static/js/main.168ff893.js"
+    "static/css/main.219dc0b5.css",
+    "static/js/main.1b52d064.js"
   ]
 }
