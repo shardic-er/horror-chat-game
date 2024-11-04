@@ -13,8 +13,9 @@ import { setDisplayMode } from '../../../store/slices/navigationSlice';
 import { Book } from '../../../types/libraryTypes';
 import ChatWindow from "../../game/ChatWindow/ChatWindow";
 import ChatInput from "../../game/ChatInput/ChatInput";
-import ChatMessage from '../../game/ChatWindow/ChatMessage';
+import ChatMessage from '../../game/ChatMessage/ChatMessage';
 import './GameScreen.styles.css';
+import StatsDisplay from "../../statsDisplay/StatsDisplay";
 
 const GameScreen: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -69,7 +70,6 @@ const GameScreen: React.FC = () => {
                         <LibraryScreen onBookSelect={handleBookSelect} />
                     </div>
                 );
-
             case 'reading':
                 if (!selectedBook) return null;
                 const currentPageContent = selectedBook.content.pages[currentPage];
@@ -94,22 +94,22 @@ const GameScreen: React.FC = () => {
                             onNextPage={() => currentPage < selectedBook.content.pages.length - 1 && setCurrentPage(p => p + 1)}
                             onPrevPage={() => currentPage > 0 && setCurrentPage(p => p - 1)}
                         />
+                        <StatsDisplay />
                     </div>
-                );
 
+                );
             case 'chat':
                 return (
-                    <>
-                        <div className="chat-messages-container chat">
+                    <div className="chat-area">
+                        <div className="chat-messages-container">
                             <ChatWindow />
                         </div>
                         <ChatInput onInputLimitChange={setIsInputFull} />
-                    </>
+                        <StatsDisplay />
+                    </div>
                 );
-
             case 'forget':
                 return <ForgetScreen />;
-
             default:
                 return null;
         }

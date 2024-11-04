@@ -1,8 +1,7 @@
-// src/components/ChatWindow/ChatMessage.tsx
-
 import React, { useState, useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { addNewWord } from '../../../store/slices/vocabularySlice';
+import { updateUserState } from '../../../store/slices/gameSlice';
 import RedactedWord from '../RedactedWord/RedactedWord';
 import './ChatMessage.styles.css';
 
@@ -42,7 +41,9 @@ const parseWord = (word: string): ParsedWord => {
 const ChatMessage: React.FC<ChatMessageProps> = ({ content, style }) => {
     const dispatch = useAppDispatch();
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
+    const progressStats = useAppSelector(state => state.game.currentUser?.progressStats);
     const [activeWordIndex, setActiveWordIndex] = useState<number | null>(null);
+    const [wasCompleted, setWasCompleted] = useState(false);
 
     // Create a set of known words for faster lookups
     const wordSet = new Set(knownWords.map(word => word.toLowerCase()));
@@ -81,9 +82,28 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ content, style }) => {
     }, [activeWordIndex, moveToNextRedactedWord]);
 
     const handleCorrectGuess = async (word: string) => {
-        console.log('Correct guess:', word); // Debug log
         await dispatch(addNewWord(word));
         moveToNextRedactedWord(activeWordIndex);
+
+        // Check if this was the last redacted word
+        const updatedWordSet = new Set([...knownWords, word].map(w => w.toLowerCase()));
+        const hasRemainingRedacted = parsedWords.some(
+            parsed => parsed.baseWord && !updatedWordSet.has(parsed.baseWord.toLowerCase())
+        );
+
+        // If all words are now known and we haven't marked this complete before
+        if (!hasRemainingRedacted && !wasCompleted) {
+            setWasCompleted(true);
+
+            // Ensure we maintain both stats when updating
+            const currentStats = progressStats || { solvedChatMessages: 0, completedBooks: 0 };
+            dispatch(updateUserState({
+                progressStats: {
+                    solvedChatMessages: currentStats.solvedChatMessages + 1,
+                    completedBooks: currentStats.completedBooks // Maintain existing value
+                }
+            }));
+        }
     };
 
     React.useEffect(() => {

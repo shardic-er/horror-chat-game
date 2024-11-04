@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Alert } from 'react-bootstrap';
 import { useAppSelector } from '../../../store/hooks';
-import ChatMessage from './ChatMessage';
+import ChatMessage from '../ChatMessage/ChatMessage';
 import './ChatWindow.styles.css';
 
 const ChatWindow: React.FC = () => {
