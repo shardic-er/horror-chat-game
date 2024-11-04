@@ -18,7 +18,7 @@ const IDontBelieveInGhosts: Book = {
     // basic(200-5000 words)
     // intermediate(5000-20000)
     // advanced (+20000)
-    tags:['basic'],
+    tags:['beginner'],
     content: {
         backgroundType: "book",
         pages: [
