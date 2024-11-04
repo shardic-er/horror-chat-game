@@ -28,7 +28,7 @@ export const libraryContent: Book[] = [
     IDontBelieveInGhosts,
     NervousMervis,
     YouCantGoBack,
-    // ILoveYouGoodbye,
+    ILoveYouGoodbye,
 ];
 
 // Define the difficulty order
