@@ -14,11 +14,9 @@
     position: fixed;
     will-change: transform, opacity;
     pointer-events: none;
-    animation: deleteWord 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    /* Set initial position to center of viewport */
-    top: 50vh;
-    left: 50vw;
-    transform: translate(-50%, -50%);
+    --arc-x: 0;
+    --arc-y: 0;
+    --rotation: 0;
 }
 
 .deleting-word .badge {
@@ -33,17 +31,20 @@
     position: relative;
 }
 
+.deleting-word {
+    animation: deleteWord 2s cubic-bezier(.25,-0.34,.83,.67) forwards;
+}
+
 @keyframes deleteWord {
     0% {
-        transform: translate(calc(-50% + var(--offset-x, 0px)),
-        calc(-50% + var(--offset-y, 0px)))
-        rotate(var(--start-rotation, 0deg));
+        transform: translate(0, 0) rotate(0deg);
         opacity: 1;
     }
     100% {
-        transform: translate(calc(-50% + var(--offset-x, 0px) + var(--end-x, 200px)),
-        calc(-50% + var(--offset-y, 0px) + 800px))
-        rotate(calc(var(--start-rotation, 0deg) + var(--spin-amount, 720deg)));
+        transform: translate(
+                calc(var(--arc-x) * 1px),
+                calc(var(--arc-y) * 1px)
+        ) rotate(calc(var(--rotation) * 1deg));
         opacity: 0;
     }
 }
@@ -58,11 +59,6 @@
     height: 100%;
     background: #dc3545;
     clip: rect(0, 0, 0, 0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
 }
 
 .deleting-word .badge::before {

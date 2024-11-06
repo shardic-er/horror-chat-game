@@ -24,25 +24,37 @@ const WordDeletion: React.FC<WordDeletionProps> = ({
         Math.random() * (max - min) + min;
 
     const initializeWords = useCallback(() => {
-        return words.map((word, index) => {
-            // Random initial offset from center
-            const offsetX = getRandomInRange(-500, 500);
-            const offsetY = getRandomInRange(-200, 200);
+        // Get viewport dimensions
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const centerX = viewportWidth / 2;
+        const centerY = viewportHeight / 2;
 
-            // Random parameters for motion
-            const startRotation = getRandomInRange(-30, 30);
-            const spinAmount = getRandomInRange(540, 900) * (Math.random() > 0.5 ? 1 : -1);
-            const endX = getRandomInRange(-300, 300);
+        return words.map((word, index) => {
+            // Random starting position around center
+            const spreadX = getRandomInRange(-centerX/3, centerX/3);
+            const spreadY = getRandomInRange(-centerY/3, centerY/3);
+            const startX = centerX + spreadX;
+            const startY = centerY + spreadY;
+
+            // Random arc parameters
+            const arcX = getRandomInRange(-centerX/3, centerX/3); // Final x position
+            const arcY = getRandomInRange(centerY/3, centerY/3); // Final y position
+            const arcHeight = getRandomInRange(-300, -100); // Height of arc (negative for upward arc)
+            const arcXMid = arcX * Math.random(); // Midpoint x position
+            const rotation = getRandomInRange(360, 720) * (Math.random() > 0.5 ? 1 : -1); // Random rotation
 
             return {
                 id: `${word}-${Date.now()}-${index}`,
                 word,
                 style: {
-                    '--offset-x': `${offsetX}px`,
-                    '--offset-y': `${offsetY}px`,
-                    '--start-rotation': `${startRotation}deg`,
-                    '--spin-amount': `${spinAmount}deg`,
-                    '--end-x': `${endX}px`,
+                    top: `${startY}px`,
+                    left: `${startX}px`,
+                    '--arc-x': arcX,
+                    '--arc-y': arcY,
+                    '--arc-x-mid': arcXMid,
+                    '--arc-height': arcHeight,
+                    '--rotation': rotation,
                     animationDelay: `${index * 100}ms`,
                 } as React.CSSProperties
             };
@@ -54,15 +66,12 @@ const WordDeletion: React.FC<WordDeletionProps> = ({
             const newWords = initializeWords();
             setDeletingWords(newWords);
 
-            // Calculate total animation duration including delays
             const totalDuration = 2000 + (words.length - 1) * 100;
 
-            // Clear any existing timeout
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
 
-            // Set timeout for completion
             timeoutRef.current = setTimeout(() => {
                 onComplete?.();
                 setDeletingWords([]);
