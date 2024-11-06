@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/horror-chat-game/static/css/main.f0b8b0c1.css",
-    "main.js": "/horror-chat-game/static/js/main.681cf237.js",
+    "main.css": "/horror-chat-game/static/css/main.6c21e1b7.css",
+    "main.js": "/horror-chat-game/static/js/main.a397270a.js",
     "static/media/IWantToForget.webp": "/horror-chat-game/static/media/IWantToForget.bc4402f6c535273c12b5.webp",
     "static/media/ILoveYouGoodbye4.png": "/horror-chat-game/static/media/ILoveYouGoodbye4.f7a9b0a9f365b73805e5.png",
     "static/media/ILoveYouGoodbye2.png": "/horror-chat-game/static/media/ILoveYouGoodbye2.725d7c8ed1be363b4755.png",
@@ -73,11 +73,11 @@
     "static/media/ChatModeIcon.svg": "/horror-chat-game/static/media/ChatModeIcon.c2b506d0d9533e42757ade547ecc31c7.svg",
     "static/media/ShapesCoverImage.svg": "/horror-chat-game/static/media/ShapesCoverImage.d484f84e69edd0bf68eff2e040014bf5.svg",
     "static/media/ResetChatIcon.svg": "/horror-chat-game/static/media/ResetChatIcon.21daaf21e02cf9af590882c1c70b7d18.svg",
-    "main.f0b8b0c1.css.map": "/horror-chat-game/static/css/main.f0b8b0c1.css.map",
-    "main.681cf237.js.map": "/horror-chat-game/static/js/main.681cf237.js.map"
+    "main.6c21e1b7.css.map": "/horror-chat-game/static/css/main.6c21e1b7.css.map",
+    "main.a397270a.js.map": "/horror-chat-game/static/js/main.a397270a.js.map"
   },
   "entrypoints": [
-    "static/css/main.f0b8b0c1.css",
-    "static/js/main.681cf237.js"
+    "static/css/main.6c21e1b7.css",
+    "static/js/main.a397270a.js"
   ]
 }
