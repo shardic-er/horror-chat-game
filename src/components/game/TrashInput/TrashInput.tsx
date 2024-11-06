@@ -6,28 +6,32 @@ import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { forgetWords } from '../../../store/slices/vocabularySlice';
 import './TrashInput.styles.css';
 
+const MAX_WORDS = 5;
+
 const TrashInput: React.FC = () => {
     const dispatch = useAppDispatch();
     const [stagedWords, setStagedWords] = useState<string[]>([]);
     const [currentInput, setCurrentInput] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [showLimitWarning, setShowLimitWarning] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const knownWords = useAppSelector((state) => state.vocabulary.knownWords);
     const forgottenWords = useAppSelector((state) => state.vocabulary.forgottenWords);
-    const wordLimit = useAppSelector((state) => state.vocabulary.wordLimit);
 
-    const isAtWordLimit = stagedWords.length >= wordLimit;
+    const isAtWordLimit = stagedWords.length >= MAX_WORDS;
 
     // Listen for word selections from vocabulary list
     useEffect(() => {
         const handleVocabWord = (event: CustomEvent<{ word: string, mode: string }>) => {
-            if (event.detail.mode === 'forget' && !isAtWordLimit) {
+            if (event.detail.mode === 'forget') {
                 const word = event.detail.word;
-                // Check if word is already staged
-                if (!stagedWords.includes(word)) {
+                if (stagedWords.length < MAX_WORDS && !stagedWords.includes(word)) {
                     setStagedWords(prev => [...prev, word]);
                     setCurrentInput('');
+                } else if (stagedWords.length >= MAX_WORDS) {
+                    setShowLimitWarning(true);
+                    setTimeout(() => setShowLimitWarning(false), 3000);
                 }
             }
         };
@@ -36,7 +40,7 @@ const TrashInput: React.FC = () => {
         return () => {
             window.removeEventListener('vocab-word-selected', handleVocabWord as EventListener);
         };
-    }, [stagedWords, isAtWordLimit]);
+    }, [stagedWords]);
 
     useEffect(() => {
         inputRef.current?.focus();
@@ -76,6 +80,9 @@ const TrashInput: React.FC = () => {
             !stagedWords.includes(word)) {
             setStagedWords(prev => [...prev, word]);
             setCurrentInput('');
+        } else if (isAtWordLimit) {
+            setShowLimitWarning(true);
+            setTimeout(() => setShowLimitWarning(false), 3000);
         }
     };
 
@@ -107,6 +114,11 @@ const TrashInput: React.FC = () => {
             <Card.Body className="p-2">
                 <div className="input-flex-container">
                     <div className="input-area">
+                        {showLimitWarning && (
+                            <div className="limit-warning">
+                                Maximum {MAX_WORDS} words can be deleted at once
+                            </div>
+                        )}
                         <div className="trash-sentence-builder">
                             <div className="staged-words">
                                 {stagedWords.map((word, index) => (
@@ -124,7 +136,7 @@ const TrashInput: React.FC = () => {
                                     value={currentInput}
                                     onChange={handleInputChange}
                                     onKeyDown={handleKeyDown}
-                                    placeholder={isAtWordLimit ? 'Press Enter to forget' : 'An elephant never forgets...'}
+                                    placeholder={isAtWordLimit ? 'Press Enter to forget' : 'Select up to 5 words to forget...'}
                                     className={`inline-input ${isAtWordLimit ? 'at-limit' : ''}`}
                                     disabled={isProcessing}
                                 />

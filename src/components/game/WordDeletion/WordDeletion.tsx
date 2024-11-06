@@ -1,5 +1,3 @@
-// src/components/game/WordDeletion/WordDeletion.tsx
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import './WordDeletion.styles.css';
@@ -7,11 +5,7 @@ import './WordDeletion.styles.css';
 interface DeletingWord {
     id: string;
     word: string;
-    startX: number;
-    startY: number;
-    rotation: number;
-    scale: number;
-    progress: number;
+    style: React.CSSProperties;
 }
 
 interface WordDeletionProps {
@@ -19,115 +13,68 @@ interface WordDeletionProps {
     onComplete?: () => void;
 }
 
-const WordDeletion: React.FC<WordDeletionProps> = (
-    {
-       words,
-       onComplete
-    }) => {
+const WordDeletion: React.FC<WordDeletionProps> = ({
+                                                       words,
+                                                       onComplete
+                                                   }) => {
     const [deletingWords, setDeletingWords] = useState<DeletingWord[]>([]);
-    const animationFrame = useRef<number>();
-    const startTime = useRef<number>(0);
-    const deletingWordsRef = useRef<DeletingWord[]>([]);
+    const timeoutRef = useRef<NodeJS.Timeout>();
+
+    const getRandomInRange = (min: number, max: number) =>
+        Math.random() * (max - min) + min;
 
     const initializeWords = useCallback(() => {
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
+        return words.map((word, index) => {
+            // Random initial offset from center
+            const offsetX = getRandomInRange(-500, 500);
+            const offsetY = getRandomInRange(-200, 200);
 
-        return words.map((word, index) => ({
-            id: `${word}-${Date.now()}-${index}`,
-            word,
-            startX: centerX + (Math.random() - 0.5) * 200,
-            startY: centerY + (Math.random() - 0.5) * 200,
-            rotation: Math.random() * 360,
-            scale: 1,
-            progress: 0
-        }));
+            // Random parameters for motion
+            const startRotation = getRandomInRange(-30, 30);
+            const spinAmount = getRandomInRange(540, 900) * (Math.random() > 0.5 ? 1 : -1);
+            const endX = getRandomInRange(-300, 300);
+
+            return {
+                id: `${word}-${Date.now()}-${index}`,
+                word,
+                style: {
+                    '--offset-x': `${offsetX}px`,
+                    '--offset-y': `${offsetY}px`,
+                    '--start-rotation': `${startRotation}deg`,
+                    '--spin-amount': `${spinAmount}deg`,
+                    '--end-x': `${endX}px`,
+                    animationDelay: `${index * 100}ms`,
+                } as React.CSSProperties
+            };
+        });
     }, [words]);
 
     useEffect(() => {
         if (words.length > 0) {
             const newWords = initializeWords();
             setDeletingWords(newWords);
-            startTime.current = Date.now();
-        }
-    }, [words, initializeWords]);
 
-    useEffect(() => {
-        deletingWordsRef.current = deletingWords;
-    }, [deletingWords]);
+            // Calculate total animation duration including delays
+            const totalDuration = 2000 + (words.length - 1) * 100;
 
-    useEffect(() => {
-        if (deletingWordsRef.current.length === 0) return;
-
-        const duration = 2000;
-        let lastTime = Date.now();
-
-        const animate = () => {
-            const currentTime = Date.now();
-            const deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
-
-            setDeletingWords(prev => {
-                const updated = prev.map(word => {
-                    if (word.progress >= 1) return word;
-                    const newProgress = Math.min(word.progress + (deltaTime / duration), 1);
-                    return {
-                        ...word,
-                        progress: newProgress
-                    };
-                });
-
-                if (updated.every(w => w.progress >= 1)) {
-                    requestAnimationFrame(() => {
-                        onComplete?.();
-                        setDeletingWords([]);
-                    });
-                }
-
-                return updated;
-            });
-
-            if (!deletingWordsRef.current.every(w => w.progress >= 1)) {
-                animationFrame.current = requestAnimationFrame(animate);
+            // Clear any existing timeout
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
             }
-        };
 
-        animationFrame.current = requestAnimationFrame(animate);
+            // Set timeout for completion
+            timeoutRef.current = setTimeout(() => {
+                onComplete?.();
+                setDeletingWords([]);
+            }, totalDuration);
+        }
 
         return () => {
-            if (animationFrame.current) {
-                cancelAnimationFrame(animationFrame.current);
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
             }
         };
-    }, [onComplete]);
-
-    const getWordStyle = (word: DeletingWord) => {
-        const t = word.progress;
-
-        // Easing function for more dramatic effect
-        const easeInQuart = (t: number) => t * t * t * t;
-        const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
-
-        // Scale down and fade out
-        const scale = 1 - easeInQuart(t) * 0.8;
-        const opacity = 1 - easeOutQuart(t);
-
-        // Spiral downward motion
-        const angle = t * Math.PI * 4;
-        const radius = 100 * t;
-        const offsetX = Math.cos(angle) * radius;
-        const offsetY = Math.sin(angle) * radius + (200 * t); // Add downward motion
-
-        // Apply transformations
-        const x = word.startX + offsetX;
-        const y = word.startY + offsetY;
-        const rotation = word.rotation + (t * 720); // Two full rotations
-
-        return {
-            transform: `translate3d(${x}px, ${y}px, 0) rotate(${rotation}deg) scale(${scale})`,
-            opacity
-        };
-    };
+    }, [words, initializeWords, onComplete]);
 
     if (deletingWords.length === 0) return null;
 
@@ -137,9 +84,9 @@ const WordDeletion: React.FC<WordDeletionProps> = (
                 <div
                     key={word.id}
                     className="deleting-word"
-                    style={getWordStyle(word)}
+                    style={word.style}
                 >
-                    <span className="badge">
+                    <span className="badge" data-text={word.word}>
                         {word.word}
                     </span>
                 </div>

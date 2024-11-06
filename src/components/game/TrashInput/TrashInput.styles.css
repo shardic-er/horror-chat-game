@@ -106,3 +106,31 @@
 .suggestion-item:hover {
     background-color: rgba(220, 53, 69, 0.2);
 }
+
+.limit-warning {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #ffc107;
+    padding: 0.5rem;
+    border-radius: 4px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    animation: fadeInOut 3s forwards;
+    font-size: 0.9rem;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+.input-area {
+    position: relative;
+    width: 100%;
+}
