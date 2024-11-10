@@ -41,4 +41,3 @@ META-INF
 .pem
 .docx
 .assets
-.css

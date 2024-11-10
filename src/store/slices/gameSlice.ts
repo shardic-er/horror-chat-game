@@ -15,7 +15,7 @@ import {
     updateUser
 } from '../../services/userService';
 import { LLMClient } from '../../services/llmClient';
-import { AI_PARTNERS } from '../../config/aiPartners';
+import { CHAT_PARTNERS } from '../../config/aiPartners';
 import { getApiKey } from '../../services/apiKeyService';
 import { setProgressFlags } from './vocabularySlice';
 
@@ -39,8 +39,8 @@ export interface GameSlice {
 const initialState: GameSlice = {
     currentUser: null,
     chatHistories: {},
-    availablePartners: AI_PARTNERS,
-    currentPartnerId: AI_PARTNERS[0].id,
+    availablePartners: CHAT_PARTNERS,
+    currentPartnerId: CHAT_PARTNERS[0].id,
     isInitialized: false,
     error: undefined,
     chatState: {

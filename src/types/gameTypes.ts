@@ -39,13 +39,6 @@ export interface PaginatedContent {
     backgroundType: 'book' | 'terminal' | 'letter' | 'note';
 }
 
-export interface GameContent {
-    mode: DisplayMode;
-    content: PaginatedContent | AIPartner;
-}
-
-export type BookDifficulty = 'beginner' | 'basic' | 'intermediate' | 'advanced';
-
 export interface ChatError {
     message: string;
     timestamp: string;

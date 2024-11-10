@@ -1,15 +1,12 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef, useState } from 'react';
 import { DisplayMode, ProgressFlag } from '../../../types/gameTypes';
 import { useAppSelector, useAppDispatch } from '../../../store/hooks';
 import { selectMistakeProgress } from '../../../store/slices/vocabularySlice';
-import { setCurrentPartner, resetChatHistory } from '../../../store/slices/gameSlice';
 import DebugMode from '../DebugMode/DebugMode';
-import { AI_PARTNERS } from '../../../config/aiPartners';
 import { ReactComponent as LibraryModeIcon } from '../../../assets/images/LibraryModeIcon.svg';
 import { ReactComponent as ChatModeIcon } from '../../../assets/images/ChatModeIcon.svg';
 import { ReactComponent as ForgetModeIcon } from '../../../assets/images/ForgetModeIcon.svg';
 import { ReactComponent as DebugModeIcon } from '../../../assets/images/DebugModeIcon.svg';
-import { ReactComponent as ResetChatIcon } from '../../../assets/images/ResetChatIcon.svg';
 import './GameMenu.styles.css';
 
 interface GameMenuProps {
@@ -19,19 +16,14 @@ interface GameMenuProps {
 
 const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
     const dispatch = useAppDispatch();
-    const [showPartners, setShowPartners] = useState(false);
     const [debugMode, setDebugMode] = useState(false);
     const debugButtonRef = useRef<HTMLButtonElement>(null);
     const mistakeProgress = useAppSelector(selectMistakeProgress);
-    const currentPartnerId = useAppSelector(state => state.game.currentPartnerId);
     const completedDeletions = useAppSelector(state =>
         state.game.currentUser?.progressFlags[ProgressFlag.COMPLETED_DELETIONS] ?? false
     );
 
-    const handlePartnerSelect = (partnerId: string) => {
-        dispatch(setCurrentPartner(partnerId));
-        setShowPartners(false);
-    };
+    // Removed showPartners state and related handlers
 
     return (
         <div className="game-menu">
@@ -44,47 +36,14 @@ const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
                 <LibraryModeIcon className="menu-icon" />
             </button>
 
-            <div className={`chat-menu-container ${showPartners ? 'expanded' : ''}`}>
-                <button
-                    className={`menu-button ${currentMode === 'chat' ? 'active' : ''}`}
-                    onClick={() => {
-                        if (currentMode === 'chat') {
-                            setShowPartners(!showPartners);
-                        } else {
-                            onModeSelect('chat');
-                        }
-                    }}
-                    aria-label="Chat Mode"
-                    title="Chat Mode"
-                >
-                    <ChatModeIcon className="menu-icon" />
-                </button>
-
-                {showPartners && (
-                    <div className="partner-list">
-                        {AI_PARTNERS.map(partner => (
-                            <button
-                                key={partner.id}
-                                className={`partner-button ${currentPartnerId === partner.id ? 'active' : ''}`}
-                                onClick={() => handlePartnerSelect(partner.id)}
-                            >
-                                {partner.name}
-                            </button>
-                        ))}
-                        <button
-                            className="partner-button reset-button"
-                            onClick={() => {
-                                if (currentPartnerId) {
-                                    dispatch(resetChatHistory(currentPartnerId));
-                                }
-                            }}
-                        >
-                            <ResetChatIcon className="menu-icon" />
-                            Reset Conversation
-                        </button>
-                    </div>
-                )}
-            </div>
+            <button
+                className={`menu-button ${currentMode === 'chat' ? 'active' : ''}`}
+                onClick={() => onModeSelect('chat')}
+                aria-label="Chat Mode"
+                title="Chat Mode"
+            >
+                <ChatModeIcon className="menu-icon" />
+            </button>
 
             <button
                 className={`menu-button ${currentMode === 'forget' ? 'active' : ''}`}

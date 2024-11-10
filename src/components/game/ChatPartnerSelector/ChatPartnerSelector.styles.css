@@ -1,0 +1,163 @@
+:root {
+    --partner-bg: var(--game-dark);
+    --partner-text: var(--game-text);
+    --partner-accent: var(--game-border);
+}
+
+.chat-partner-selector {
+    position: relative;
+    width: 100%;
+    padding: .5rem;
+    background: var(--game-darker);
+    border-bottom: 1px solid var(--game-border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.partners-container {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    padding: 0.5rem;
+}
+
+.partners-container::-webkit-scrollbar {
+    display: none;
+}
+
+.partner-button {
+    min-width: 80px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-color: var(--partner-bg, var(--game-dark));
+    color: var(--partner-text, var(--game-text));
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.partner-button:not(.locked):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-color: var(--partner-accent, var(--game-text));
+}
+
+.partner-button.active {
+    border-color: var(--partner-accent, var(--game-text));
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.partner-button.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.8);
+}
+
+.partner-button.locked:hover {
+    transform: none;
+    border-color: transparent;
+}
+
+.partner-icon {
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+}
+
+.partner-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.lock-icon {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    background: var(--game-darker);
+    border-radius: 50%;
+    padding: 2px;
+}
+
+.scroll-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--game-dark);
+    border: 1px solid var(--game-border);
+    color: var(--game-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1;
+    font-size: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.scroll-button:hover {
+    background: var(--game-hover);
+}
+
+.scroll-button.left {
+    left: 0.5rem;
+}
+
+.scroll-button.right {
+    right: 0.5rem;
+}
+
+.reset-button {
+    min-width: 80px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-color: var(--partner-bg, var(--game-dark));
+    color: var(--partner-text, var(--game-text));
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.reset-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-color: var(--partner-accent, var(--game-text));
+}
+
+/* Add hover styles for desktop only */
+@media (hover: hover) {
+    .scroll-button:hover {
+        background: var(--game-hover);
+        transform: translateY(-50%) scale(1.1);
+    }
+}
+
+/* Hide scroll buttons on touch devices */
+@media (hover: none) {
+    .scroll-button {
+        display: none;
+    }
+}
+

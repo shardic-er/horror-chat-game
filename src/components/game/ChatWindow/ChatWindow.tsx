@@ -1,9 +1,8 @@
-// src/components/ChatWindow/ChatWindow.tsx
-
 import React, { useEffect, useRef } from 'react';
 import { Alert } from 'react-bootstrap';
 import { useAppSelector } from '../../../store/hooks';
 import ChatMessage from '../ChatMessage/ChatMessage';
+import ChatPartnerSelector from '../ChatPartnerSelector/ChatPartnerSelector';
 import './ChatWindow.styles.css';
 
 const ChatWindow: React.FC = () => {
@@ -24,7 +23,8 @@ const ChatWindow: React.FC = () => {
     }, [chatHistory]);
 
     return (
-        <div className="chat-window">
+        <div className="chat-window-container">
+            <ChatPartnerSelector />
             <div className="messages-container">
                 {chatHistory?.map((message) => (
                     <div
