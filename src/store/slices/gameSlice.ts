@@ -1,24 +1,29 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { v4 as uuidv4 } from 'uuid';
-import { AppDispatch, RootState } from '../../types/store.types';
-import {
-    UserData,
-    ChatMessage,
-    ChatError,
-    ChatHistory,
-    AIPartner
-} from '../../types/gameTypes';
-import {
-    loadUser,
-    saveUser,
-    createNewUser,
-    updateUser
-} from '../../services/userService';
-import { LLMClient } from '../../services/llmClient';
-import { CHAT_PARTNERS } from '../../config/aiPartners';
-import { getApiKey } from '../../services/apiKeyService';
-import { setProgressFlags } from './vocabularySlice';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {v4 as uuidv4} from 'uuid';
+import {AppDispatch, RootState} from '../../types/store.types';
+import {AIPartner, ChatError, ChatHistory, ChatMessage, UserData} from '../../types/gameTypes';
+import {createNewUser, loadUser, saveUser, updateUser} from '../../services/userService';
+import {LLMClient} from '../../services/llmClient';
+import {CHAT_PARTNERS} from '../../config/aiPartners';
+import {getApiKey} from '../../services/apiKeyService';
+import {setProgressFlags} from './vocabularySlice';
+import GameLogger from "../../services/loggerService";
 
+export interface ChatState {
+    isLoading: boolean;
+    error: ChatError | null;
+    messageQueue: string[];
+    retryCount: number;
+    loadingPartnerId?: string; // Track which partner is loading
+}
+
+export interface ChatState {
+    isLoading: boolean;
+    error: ChatError | null;
+    messageQueue: string[];
+    retryCount: number;
+    loadingPartnerId?: string; // Track which partner is loading
+}
 
 export interface GameSlice {
     currentUser: UserData | null;
@@ -27,15 +32,11 @@ export interface GameSlice {
     currentPartnerId?: string;
     isInitialized: boolean;
     error?: string;
-    chatState: {
-        isLoading: boolean;
-        error: ChatError | null;
-        messageQueue: string[];
-        retryCount: number;
-    };
+    chatState: ChatState
 }
 
 // Enhanced initial state with chat-specific fields
+// And ensure the initial state matches:
 const initialState: GameSlice = {
     currentUser: null,
     chatHistories: {},
@@ -47,48 +48,64 @@ const initialState: GameSlice = {
         isLoading: false,
         error: null,
         messageQueue: [],
-        retryCount: 0
+        retryCount: 0,
+        loadingPartnerId: undefined
     }
 };
 
-// Async thunk for sending messages
 export const sendMessage = createAsyncThunk<
-    string,
+    { response: string; partnerId: string },
     { message: string; partnerId: string },
     { state: RootState }
     >(
     'game/sendMessage',
     async ({ message, partnerId }, { getState, rejectWithValue }) => {
-        console.log('User Message:', message); // Debug logging
+        GameLogger.logGameState({
+            type: 'Message Send Attempt',
+            partnerId,
+            message,
+            timestamp: new Date().toISOString()
+        });
 
         const apiKey = getApiKey();
         if (!apiKey) {
+            GameLogger.logError('Message Send', new Error('API key not found'));
             throw new Error('API key not found');
         }
 
         const state = getState();
         const partner = state.game.availablePartners.find(p => p.id === partnerId);
         if (!partner) {
+            GameLogger.logError('Message Send', new Error('AI partner not found'));
             throw new Error('AI partner not found');
         }
 
-        const chatHistory = state.game.chatHistories[partnerId]?.messages || [];
-        console.log('Chat History:', chatHistory); // Debug logging
-
         try {
             const llmClient = new LLMClient(apiKey);
+            const chatHistory = state.game.chatHistories[partnerId]?.messages || [];
+
             const response = await llmClient.generateResponse(
                 partner,
                 chatHistory,
                 message
             );
-            console.log('AI Response:', response); // Debug logging
-            return response;
+
+            GameLogger.logGameState({
+                type: 'Message Send Success',
+                partnerId,
+                messageLength: message.length,
+                responseLength: response.length,
+                timestamp: new Date().toISOString()
+            });
+
+            return { response, partnerId };
         } catch (error) {
+            GameLogger.logError('Message Send Failed', error);
             return rejectWithValue((error as Error).message);
         }
     }
 );
+
 
 const gameSlice = createSlice({
     name: 'game',
@@ -128,55 +145,79 @@ const gameSlice = createSlice({
         setCurrentPartner: (state, action: PayloadAction<string>) => {
             state.currentPartnerId = action.payload;
         },
-        clearChatError: (state) => {
-            state.chatState.error = null;
-        },
         setError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
         },
         setInitialized: (state, action: PayloadAction<boolean>) => {
             state.isInitialized = action.payload;
         },
-        resetChatState: (state) => {
-            state.chatState = initialState.chatState;
-        }
+
     },
     extraReducers: (builder) => {
         builder
-            // Handle sendMessage lifecycle
-            .addCase(sendMessage.pending, (state) => {
-                state.chatState.isLoading = true;
-                state.chatState.error = null;
-            })
             .addCase(sendMessage.fulfilled, (state, action) => {
+                const { response, partnerId } = action.payload;
+
+                GameLogger.logGameState({
+                    type: 'Chat State Update',
+                    action: 'Message Fulfilled',
+                    partnerId,
+                    currentPartnerId: state.currentPartnerId,
+                    isLoading: state.chatState.isLoading,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Always clear loading state and partnerId when response is received
                 state.chatState.isLoading = false;
+                state.chatState.loadingPartnerId = undefined;
                 state.chatState.retryCount = 0;
 
-                // Add AI response to chat history
-                if (state.currentPartnerId) {
-                    const aiMessage: ChatMessage = {
-                        id: uuidv4(),
-                        sender: state.currentPartnerId,
-                        content: action.payload
+                // Always add the message to the correct chat history
+                const aiMessage: ChatMessage = {
+                    id: uuidv4(),
+                    sender: partnerId,
+                    content: response
+                };
+
+                if (!state.chatHistories[partnerId]) {
+                    state.chatHistories[partnerId] = {
+                        partnerId,
+                        messages: []
                     };
-
-                    if (!state.chatHistories[state.currentPartnerId]) {
-                        state.chatHistories[state.currentPartnerId] = {
-                            partnerId: state.currentPartnerId,
-                            messages: []
-                        };
-                    }
-
-                    state.chatHistories[state.currentPartnerId].messages.push(aiMessage);
                 }
+
+                state.chatHistories[partnerId].messages.push(aiMessage);
             })
             .addCase(sendMessage.rejected, (state, action) => {
-                state.chatState.isLoading = false;
-                state.chatState.error = {
-                    message: action.payload as string || 'Failed to send message',
+                const partnerId = action.meta.arg.partnerId;
+
+                GameLogger.logGameState({
+                    type: 'Chat State Update',
+                    action: 'Message Rejected',
+                    partnerId,
+                    currentPartnerId: state.currentPartnerId,
+                    error: action.payload,
                     timestamp: new Date().toISOString()
-                };
-                state.chatState.retryCount += 1;
+                });
+
+                // Always clear loading state
+                state.chatState.isLoading = false;
+                state.chatState.loadingPartnerId = undefined;
+
+                // Only set error if this is the active partner
+                if (state.currentPartnerId === partnerId) {
+                    state.chatState.error = {
+                        message: action.payload as string || 'Failed to send message',
+                        timestamp: new Date().toISOString()
+                    };
+                    state.chatState.retryCount += 1;
+                }
+            })
+            .addCase(sendMessage.pending, (state, action) => {
+                // Use the meta arg to get the partnerId from the original action
+                state.chatState.loadingPartnerId = action.meta.arg.partnerId;
+                state.chatState.isLoading = true;
+                state.chatState.error = null;
             })
             .addCase(setProgressFlags, (state, action) => {
                 if (state.currentUser) {
@@ -189,13 +230,10 @@ const gameSlice = createSlice({
 // Export actions
 export const {
     setCurrentUser,
-    updateUserData,
     addChatMessage,
     setCurrentPartner,
-    clearChatError,
     setError,
     setInitialized,
-    resetChatState,
     resetChatHistory,
 } = gameSlice.actions;
 

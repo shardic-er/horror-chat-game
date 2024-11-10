@@ -15,7 +15,6 @@ interface GameMenuProps {
 }
 
 const GameMenu: React.FC<GameMenuProps> = ({ currentMode, onModeSelect }) => {
-    const dispatch = useAppDispatch();
     const [debugMode, setDebugMode] = useState(false);
     const debugButtonRef = useRef<HTMLButtonElement>(null);
     const mistakeProgress = useAppSelector(selectMistakeProgress);

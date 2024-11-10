@@ -12,7 +12,9 @@ const ChatWindow: React.FC = () => {
         currentPartnerId ? state.game.chatHistories[currentPartnerId]?.messages : []
     );
     const chatError = useAppSelector(state => state.game.chatState.error);
-    const isLoading = useAppSelector(state => state.game.chatState.isLoading);
+    const chatState = useAppSelector(state => state.game.chatState);
+    const isLoading = chatState.isLoading && chatState.loadingPartnerId === currentPartnerId;
+
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -1,10 +1,26 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import {resetChatHistory, setCurrentPartner} from '../../../store/slices/gameSlice';
+import { createSelector } from '@reduxjs/toolkit';
+import { setCurrentPartner, resetChatHistory } from '../../../store/slices/gameSlice';
 import { CHAT_PARTNERS, ChatPartner } from '../../../config/aiPartners';
 import { ProgressFlag } from '../../../types/gameTypes';
-import { ReactComponent as ResetChatIcon } from '../../../assets/images/ResetChatIcon.svg'
+import { RootState } from '../../../types/store.types';
+import { ReactComponent as ResetChatIcon } from '../../../assets/images/ResetChatIcon.svg';
 import './ChatPartnerSelector.styles.css';
+
+// Memoized selectors
+const selectCurrentPartnerId = (state: RootState) => state.game.currentPartnerId;
+const selectUserProgressFlags = (state: RootState) => state.game.currentUser?.progressFlags;
+const selectProgressFlags = createSelector(
+    [selectUserProgressFlags],
+    (flags): Record<ProgressFlag, boolean> =>
+        flags || Object.values(ProgressFlag).reduce(
+            (acc, flag) => ({ ...acc, [flag]: false }),
+            {} as Record<ProgressFlag, boolean>
+        )
+);
+
+type PartnerAvailability = 'available' | 'locked' | 'hidden';
 
 const ChatPartnerSelector: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -12,34 +28,24 @@ const ChatPartnerSelector: React.FC = () => {
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
 
-    const currentPartnerId = useAppSelector(state => state.game.currentPartnerId);
-    const progressFlags = useAppSelector(state =>
-            state.game.currentUser?.progressFlags || Object.values(ProgressFlag).reduce(
-                (acc, flag) => ({ ...acc, [flag]: false }),
-                {} as Record<ProgressFlag, boolean>
-            )
-    );
+    const currentPartnerId = useAppSelector(selectCurrentPartnerId);
+    const progressFlags = useAppSelector(selectProgressFlags);
 
-    const checkPartnerAvailability = (partner: ChatPartner) => {
+    const checkPartnerAvailability = useCallback((partner: ChatPartner): PartnerAvailability => {
         if (!partner.requirements) return 'available';
 
-        // Check visibility flag first
         if (partner.requirements.visibilityFlag &&
             !progressFlags[partner.requirements.visibilityFlag]) {
             return 'hidden';
         }
 
-        // Check unlock flags if they exist
         if (partner.requirements.unlockFlags) {
             const { flags, operation } = partner.requirements.unlockFlags;
-
-            // Get the status of each required flag
             const flagStatuses = flags.map(flag => progressFlags[flag]);
 
-            // Determine if partner is unlocked based on operation type
             const isUnlocked = operation === 'AND'
-                ? flagStatuses.every(Boolean)  // All flags must be true for AND
-                : flagStatuses.some(Boolean);  // At least one flag must be true for OR
+                ? flagStatuses.every(Boolean)
+                : flagStatuses.some(Boolean);
 
             if (!isUnlocked) {
                 return 'locked';
@@ -47,16 +53,15 @@ const ChatPartnerSelector: React.FC = () => {
         }
 
         return 'available';
-    };
+    }, [progressFlags]);
 
-    const getPartnerTooltip = (partner: ChatPartner) => {
+    const getPartnerTooltip = useCallback((partner: ChatPartner): string => {
         if (!partner.requirements) return partner.description;
 
         const status = checkPartnerAvailability(partner);
         if (status === 'locked') {
-            const requirements = [];
+            const requirements: string[] = [];
 
-            // Add flag requirements
             if (partner.requirements.unlockFlags) {
                 const { flags, operation } = partner.requirements.unlockFlags;
                 const flagNames = flags.map(flag => {
@@ -71,28 +76,28 @@ const ChatPartnerSelector: React.FC = () => {
         }
 
         return partner.description;
-    };
+    }, [checkPartnerAvailability]);
 
-    const updateArrows = () => {
-        const container = scrollContainerRef.current;
-        if (container) {
-            setShowLeftArrow(container.scrollLeft > 0);
-            setShowRightArrow(
-                container.scrollLeft < container.scrollWidth - container.clientWidth
-            );
+    // Memoize visible partners
+    const visiblePartners = useMemo(() =>
+            CHAT_PARTNERS
+                .filter(partner => checkPartnerAvailability(partner) !== 'hidden')
+                .sort((a, b) => {
+                    const aStatus = checkPartnerAvailability(a);
+                    const bStatus = checkPartnerAvailability(b);
+                    return aStatus === 'available' ? -1 : bStatus === 'available' ? 1 : 0;
+                }),
+        [checkPartnerAvailability]
+    );
+
+    const handlePartnerSelect = useCallback((partner: ChatPartner) => {
+        const availability = checkPartnerAvailability(partner);
+        if (availability === 'available') {
+            dispatch(setCurrentPartner(partner.id));
         }
-    };
+    }, [dispatch, checkPartnerAvailability]);
 
-    useEffect(() => {
-        const container = scrollContainerRef.current;
-        if (container) {
-            container.addEventListener('scroll', updateArrows);
-            updateArrows();
-            return () => container.removeEventListener('scroll', updateArrows);
-        }
-    }, []);
-
-    const scroll = (direction: 'left' | 'right') => {
+    const scroll = useCallback((direction: 'left' | 'right') => {
         const container = scrollContainerRef.current;
         if (container) {
             const scrollAmount = container.clientWidth * 0.8;
@@ -101,24 +106,26 @@ const ChatPartnerSelector: React.FC = () => {
                 behavior: 'smooth'
             });
         }
-    };
+    }, []);
 
-    const handlePartnerSelect = (partner: ChatPartner) => {
-        const availability = checkPartnerAvailability(partner);
-        if (availability === 'available') {
-            dispatch(setCurrentPartner(partner.id));
+    const updateArrows = useCallback(() => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            setShowLeftArrow(container.scrollLeft > 0);
+            setShowRightArrow(
+                container.scrollLeft < container.scrollWidth - container.clientWidth
+            );
         }
-    };
+    }, []);
 
-    // Filter out hidden partners and sort by unlock status
-    const visiblePartners = CHAT_PARTNERS
-        .filter(partner => checkPartnerAvailability(partner) !== 'hidden')
-        .sort((a, b) => {
-            const aStatus = checkPartnerAvailability(a);
-            const bStatus = checkPartnerAvailability(b);
-            // Available partners come first, then locked ones
-            return aStatus === 'available' ? -1 : bStatus === 'available' ? 1 : 0;
-        });
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            container.addEventListener('scroll', updateArrows);
+            updateArrows();
+            return () => container.removeEventListener('scroll', updateArrows);
+        }
+    }, [updateArrows]);
 
     return (
         <div className="chat-partner-selector">
@@ -204,4 +211,4 @@ const ChatPartnerSelector: React.FC = () => {
     );
 };
 
-export default ChatPartnerSelector;
+export default React.memo(ChatPartnerSelector);

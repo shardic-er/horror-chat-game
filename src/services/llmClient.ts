@@ -2,6 +2,7 @@
 
 import OpenAI from 'openai';
 import { AIPartner, ChatMessage } from '../types/gameTypes';
+import GameLogger from "./loggerService";
 
 export type OpenAIModel = 'gpt-4' | 'gpt-4-turbo-preview' | 'gpt-3.5-turbo';
 
@@ -25,6 +26,14 @@ export class LLMClient {
         try {
             const messages = this.prepareMessages(aiPartner, chatHistory, userMessage);
 
+            GameLogger.logLLMRequest(JSON.stringify({
+                model,
+                partner: aiPartner.name,
+                userMessage,
+                systemPrompt: aiPartner.systemPrompt,
+                contextLength: messages.length
+            }, null, 2));
+
             const response = await this.client.chat.completions.create({
                 model,
                 messages: messages as any[],
@@ -32,10 +41,13 @@ export class LLMClient {
                 temperature: aiPartner.temperature,
             });
 
-            return response.choices[0].message?.content || '';
+            const responseContent = response.choices[0].message?.content || '';
+            GameLogger.logLLMResponse(responseContent);
+
+            return responseContent;
         } catch (error) {
-            console.error('LLM Error:', error);
-            throw new Error('Failed to generate response');
+            GameLogger.logError('LLM Generation Error', error);
+            throw error;
         }
     }
 
