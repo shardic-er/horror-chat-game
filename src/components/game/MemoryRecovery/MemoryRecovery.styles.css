@@ -1,87 +1,92 @@
 /* src/components/game/MemoryRecovery/MemoryRecovery.styles.css */
-
 .memory-recovery-container {
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
+    flex-grow: 1;
+    position: relative;
+    height: 100%; /* Ensure full height */
+}
+
+.forget-content {
+    position: relative;
 }
 
 .memory-prompt-card {
-    background-color: rgba(0, 0, 0, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background-color: transparent !important;
+    border: none !important;
     color: white !important;
+    margin: 2rem auto;
+    max-width: 800px;
 }
 
 .memory-prompt-text {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     line-height: 1.6;
     text-align: center;
     margin-bottom: 2rem;
     font-style: italic;
     color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .target-words-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+    position: fixed;
+    margin-left: 28px;
+    top: 15%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    width: 200px;
+    z-index: 1;
 }
 
-.target-word-button {
-    padding: 1rem;
+.target-word-item {
+    padding: 0.75rem;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 4px;
     color: white;
-    font-size: 1rem;
-    transition: all 0.2s ease;
+    font-size: 0.9rem;
     position: relative;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
-.target-word-button:not(.recovered):hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+.target-word-text {
+    font-family: monospace;
+    letter-spacing: 0.05em;
+    flex-grow: 1;
+    text-align: left;
 }
 
-.target-word-button.recovered {
+.target-word-item.recovered {
     background: rgba(40, 167, 69, 0.2);
     border-color: rgba(40, 167, 69, 0.4);
-    cursor: default;
     opacity: 0.8;
 }
 
 .recovered-checkmark {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #28a745;
-    color: white;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin-left: 0.5rem;
+    color: #28a745;
     font-size: 0.8rem;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-}
-
-.recovered-essays {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
 }
 
 .essay-card {
+    max-width: 600px;
+    margin: 0 auto;
+    margin-right: 2rem;
+    margin-left: calc(200px + 4rem);
     background-color: rgba(0, 0, 0, 0.8) !important;
     border: 1px solid rgba(40, 167, 69, 0.4) !important;
     color: white !important;
     transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .essay-word {
@@ -111,4 +116,70 @@
     color: #dc3545;
     text-align: center;
     padding: 2rem;
+}
+
+/* Scrollbar styling */
+.target-words-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.target-words-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.target-words-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.target-words-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Breakpoints */
+@media (min-width: 1600px) {
+    .target-words-grid {
+        left: calc(15% - 180px);
+    }
+}
+
+@media (max-width: 1200px) {
+    .target-words-grid {
+        left: calc(10% - 120px);
+    }
+}
+
+@media (max-width: 992px) {
+    .target-words-grid {
+        left: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .target-words-grid {
+        position: static;
+        transform: none;
+        width: auto;
+        margin: 1rem;
+        max-height: none;
+    }
+
+    .essay-card {
+        margin: 1rem;
+    }
+
+    .memory-prompt-card {
+        margin: 1rem;
+    }
 }

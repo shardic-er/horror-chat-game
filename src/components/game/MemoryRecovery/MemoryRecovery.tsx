@@ -12,11 +12,7 @@ import {
 import { Card, Spinner } from 'react-bootstrap';
 import './MemoryRecovery.styles.css';
 
-interface MemoryRecoveryProps {
-    onWordSelect?: (word: string) => void;
-}
-
-const MemoryRecovery: React.FC<MemoryRecoveryProps> = ({ onWordSelect }) => {
+const MemoryRecovery: React.FC = () => {
     const dispatch = useAppDispatch();
     const targetWords = useAppSelector(selectTargetWords);
     const isInitialized = useAppSelector(selectIsInitialized);
@@ -28,12 +24,6 @@ const MemoryRecovery: React.FC<MemoryRecoveryProps> = ({ onWordSelect }) => {
             dispatch(initializeTargetWords());
         }
     }, [dispatch, isInitialized, isLoading]);
-
-    const handleWordClick = (word: string) => {
-        if (!targetWords.find(tw => tw.word === word)?.recovered) {
-            onWordSelect?.(word);
-        }
-    };
 
     if (isLoading) {
         return (
@@ -63,32 +53,30 @@ const MemoryRecovery: React.FC<MemoryRecoveryProps> = ({ onWordSelect }) => {
                     </div>
                     <div className="target-words-grid">
                         {targetWords.map((targetWord) => (
-                            <button
+                            <div
                                 key={targetWord.word}
-                                className={`target-word-button ${targetWord.recovered ? 'recovered' : ''}`}
-                                onClick={() => handleWordClick(targetWord.word)}
-                                disabled={targetWord.recovered}
+                                className={`target-word-item ${targetWord.recovered ? 'recovered' : ''}`}
                             >
-                                {targetWord.word}
+                                <span className="target-word-text">{targetWord.word}</span>
                                 {targetWord.recovered && <span className="recovered-checkmark">✓</span>}
-                            </button>
+                            </div>
                         ))}
                     </div>
                 </Card.Body>
             </Card>
 
-            <div className="recovered-essays">
-                {targetWords
-                    .filter(tw => tw.recovered && tw.essay)
-                    .map((tw) => (
-                        <Card key={tw.word} className="essay-card">
-                            <Card.Body>
-                                <h5 className="essay-word">{tw.word}</h5>
-                                <p className="essay-text">{tw.essay}</p>
-                            </Card.Body>
-                        </Card>
-                    ))}
-            </div>
+            {targetWords.find(tw => tw.recovered && tw.essay) && (
+                <Card className="essay-card">
+                    <Card.Body>
+                        <h5 className="essay-word">
+                            {targetWords.find(tw => tw.recovered && tw.essay)?.word}
+                        </h5>
+                        <p className="essay-text">
+                            {targetWords.find(tw => tw.recovered && tw.essay)?.essay}
+                        </p>
+                    </Card.Body>
+                </Card>
+            )}
         </div>
     );
 };

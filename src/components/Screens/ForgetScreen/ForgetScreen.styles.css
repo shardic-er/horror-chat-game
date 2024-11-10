@@ -5,6 +5,8 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .forget-background {
@@ -17,7 +19,6 @@
     background-position: center;
     filter: brightness(0.3);
     z-index: 0;
-    transition: background-image 0.5s ease;
 }
 
 .forget-content {
@@ -26,15 +27,16 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 2rem;
     overflow-y: auto;
+    min-height: 0;
 }
 
 .progress-section {
     text-align: center;
     color: white;
     max-width: 600px;
-    margin: 0 auto 2rem;
+    margin: 0 auto;
+    padding: 2rem 2rem 1rem;
 }
 
 .progress-section h2 {
@@ -50,22 +52,26 @@
 }
 
 .interaction-section {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    flex-grow: 1;
 }
 
 .recovery-interface {
-    flex-grow: 1;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
     display: flex;
     flex-direction: column;
 }
 
 .trash-section {
-    max-width: 800px;
-    margin: 0 auto;
-    width: 100%;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
 }
 
 /* Animation classes */
