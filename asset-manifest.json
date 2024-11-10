@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/horror-chat-game/static/css/main.6c21e1b7.css",
-    "main.js": "/horror-chat-game/static/js/main.a397270a.js",
+    "main.css": "/horror-chat-game/static/css/main.671b0106.css",
+    "main.js": "/horror-chat-game/static/js/main.1995207b.js",
     "static/media/IWantToForget.webp": "/horror-chat-game/static/media/IWantToForget.bc4402f6c535273c12b5.webp",
     "static/media/ILoveYouGoodbye4.png": "/horror-chat-game/static/media/ILoveYouGoodbye4.f7a9b0a9f365b73805e5.png",
     "static/media/ILoveYouGoodbye2.png": "/horror-chat-game/static/media/ILoveYouGoodbye2.725d7c8ed1be363b4755.png",
@@ -72,12 +72,16 @@
     "static/media/LibraryModeIcon.svg": "/horror-chat-game/static/media/LibraryModeIcon.9703ac551be1ca4da8065c64caf89c9d.svg",
     "static/media/ChatModeIcon.svg": "/horror-chat-game/static/media/ChatModeIcon.c2b506d0d9533e42757ade547ecc31c7.svg",
     "static/media/ShapesCoverImage.svg": "/horror-chat-game/static/media/ShapesCoverImage.d484f84e69edd0bf68eff2e040014bf5.svg",
+    "static/media/LetterIcon.svg": "/horror-chat-game/static/media/LetterIcon.57ab0ce63f67f8c8b054c45d41978d48.svg",
+    "static/media/NoteIcon.svg": "/horror-chat-game/static/media/NoteIcon.cec08946f24c03ea0ca8aa667b3c95ef.svg",
+    "static/media/BookIcon.svg": "/horror-chat-game/static/media/BookIcon.f18b1f11b3692764281ad519890cc14c.svg",
     "static/media/ResetChatIcon.svg": "/horror-chat-game/static/media/ResetChatIcon.21daaf21e02cf9af590882c1c70b7d18.svg",
-    "main.6c21e1b7.css.map": "/horror-chat-game/static/css/main.6c21e1b7.css.map",
-    "main.a397270a.js.map": "/horror-chat-game/static/js/main.a397270a.js.map"
+    "static/media/TerminalIcon.svg": "/horror-chat-game/static/media/TerminalIcon.d6b5a62acf41f7a793f5e495ad115f1a.svg",
+    "main.671b0106.css.map": "/horror-chat-game/static/css/main.671b0106.css.map",
+    "main.1995207b.js.map": "/horror-chat-game/static/js/main.1995207b.js.map"
   },
   "entrypoints": [
-    "static/css/main.6c21e1b7.css",
-    "static/js/main.a397270a.js"
+    "static/css/main.671b0106.css",
+    "static/js/main.1995207b.js"
   ]
 }
