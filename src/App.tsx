@@ -5,6 +5,7 @@ import { useAppDispatch } from './store/hooks';
 import MenuScreen from './components/Screens/MenuScreen/MenuScreen';
 import GameScreen from './components/Screens/GameScreen/GameScreen';
 import WordCollectionManager from './components/game/WordCollection/WordCollectionManager';
+import AchievementToast from './components/game/AchievementToast/AchievementToast';
 import { setScreen } from './store/slices/navigationSlice';
 import { ScreenType } from './types/gameTypes';
 import { initializeGame } from './store/slices/gameSlice';
@@ -116,6 +117,7 @@ const App: React.FC = () => {
             {renderScreen()}
             <WordCollectionManager />
             <WordDeletionManager/>
+            <AchievementToast />
         </div>
     );
 };

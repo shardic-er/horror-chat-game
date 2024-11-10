@@ -53,6 +53,113 @@
     opacity: 1;
 }
 
+/* Progress Flags Section */
+.debug-flags-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    width: 100%;
+}
+
+.flag-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease;
+}
+
+.flag-icon-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.flag-icon-button:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.flag-icon-button svg {
+    width: 24px;
+    height: 24px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.flag-icon-button.active {
+    background: rgba(0, 157, 255, 0.4);
+    border-color: rgba(0, 157, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 157, 255, 0.6);
+}
+
+.flag-icon-button.active svg {
+    color: rgba(255, 255, 255, 1);
+}
+
+.flag-icon-button.active:hover {
+    background: rgba(0, 157, 255, 0.5);
+}
+
+.flag-text-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.flag-name {
+    font-weight: 500;
+    color: var(--bs-light);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.flag-description {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.flag-condition {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+/* Form Controls */
+.debug-mode-content .form-control {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: white;
+}
+
+.debug-mode-content .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.debug-mode-content .form-control:focus {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: var(--bs-danger);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Word List Section */
 .word-list {
     max-height: 200px;
     overflow-y: auto;
@@ -80,30 +187,4 @@
 
 .debug-word-badge:hover {
     background-color: var(--bs-danger) !important;
-}
-
-.debug-mode-content .card {
-    background-color: rgba(0, 0, 0, 0.2) !important;
-    border-color: rgba(220, 53, 69, 0.3) !important;
-}
-
-.debug-mode-content .card-header {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-bottom-color: rgba(220, 53, 69, 0.3);
-}
-
-.debug-mode-content .form-control {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-color: rgba(220, 53, 69, 0.3);
-    color: white;
-}
-
-.debug-mode-content .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.debug-mode-content .form-control:focus {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-color: var(--bs-danger);
-    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }

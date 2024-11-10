@@ -8,6 +8,9 @@ import { addWord, removeWords } from '../../../store/slices/vocabularySlice';
 import { updateUserState } from '../../../store/slices/gameSlice';
 import { ProgressFlag } from '../../../types/gameTypes';
 import { loadUser, saveUser } from '../../../services/userService';
+import {
+    PROGRESS_FLAG_DATA
+} from '../../../assets/progressFlags/progressFlags';
 import './DebugMode.styles.css';
 
 interface DebugModeProps {
@@ -15,25 +18,6 @@ interface DebugModeProps {
     onClose: () => void;
     anchorRef: React.RefObject<HTMLElement>;
 }
-
-// Helper function to generate human-readable label from enum value
-const getFlagLabel = (flag: string): string => {
-    return flag
-        .split(/(?=[A-Z])/)
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
-};
-
-const getFlagDescription = (flag: ProgressFlag): string => {
-    const descriptions: Record<ProgressFlag, string> = {
-        [ProgressFlag.COMPLETED_DELETIONS]: 'Marks typo deletion quota as complete (100 deletions)',
-        [ProgressFlag.BEGINNER_BOOKS_UNLOCKED]: 'Unlocks access to beginner-level reading materials',
-        [ProgressFlag.BASIC_BOOKS_UNLOCKED]: 'Unlocks access to basic reading materials',
-        [ProgressFlag.INTERMEDIATE_BOOKS_UNLOCKED]: 'Unlocks access to intermediate reading materials',
-        [ProgressFlag.ADVANCED_BOOKS_UNLOCKED]: 'Unlocks access to advanced reading materials',
-    };
-    return descriptions[flag] || `No description available for ${flag}`;
-};
 
 const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) => {
     const dispatch = useAppDispatch();
@@ -148,25 +132,30 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
                             <h6 className="mb-0">Progress Flags</h6>
                         </Card.Header>
                         <Card.Body>
-                            {allProgressFlags.map((flag) => (
-                                <div key={flag} className="d-flex align-items-center gap-2 mb-2">
-                                    <Form.Check
-                                        type="switch"
-                                        id={flag}
-                                        checked={progressFlags?.[flag] ?? false}
-                                        onChange={() => handleFlagToggle(flag)}
-                                        label={
-                                            <div>
-                                                <span className="me-2">{getFlagLabel(flag)}</span>
-                                                <small className="text-muted-light">
-                                                    ({getFlagDescription(flag)})
-                                                </small>
+                            <div className="debug-flags-grid">
+                                {allProgressFlags.map((flag) => {
+                                    const FlagIcon = PROGRESS_FLAG_DATA[flag as ProgressFlag].Icon;
+                                    const isActive = progressFlags?.[flag as ProgressFlag] ?? false;
+                                    const flagData = PROGRESS_FLAG_DATA[flag as ProgressFlag];
+
+                                    return (
+                                        <div key={flag} className="flag-item">
+                                            <button
+                                                className={`flag-icon-button ${isActive ? 'active' : ''}`}
+                                                onClick={() => handleFlagToggle(flag as ProgressFlag)}
+                                                title={isActive ? 'Click to deactivate' : 'Click to activate'}
+                                            >
+                                                <FlagIcon />
+                                            </button>
+                                            <div className="flag-text-content">
+                                                <span className="flag-name">{flagData.name}</span>
+                                                <span className="flag-description">{flagData.debugDescription}</span>
+                                                <span className="flag-condition">{flagData.unlockCondition}</span>
                                             </div>
-                                        }
-                                        className="text-light"
-                                    />
-                                </div>
-                            ))}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </Card.Body>
                     </Card>
 

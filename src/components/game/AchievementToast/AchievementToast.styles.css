@@ -1,0 +1,130 @@
+/* Update AchievementToast.styles.css */
+
+.achievement-toast-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: 100%;
+    max-width: 32rem;
+    padding: 0 1rem;
+    pointer-events: none;
+}
+
+.achievement-toast {
+    background-color: #1f2937;
+    color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    animation: achievement-float 3s ease-in-out infinite, achievement-glow 2s ease-in-out infinite;
+    transition: all 0.5s ease-out;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.achievement-toast.enter {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.achievement-toast.exit {
+    transform: translateY(100%);
+    opacity: 0;
+}
+
+.achievement-toast-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.achievement-icon-container {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.achievement-icon-container::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(
+            from 0deg,
+            transparent 0%,
+            #ffd700 50%,
+            transparent 100%
+    );
+    animation: rotate 2s linear infinite;
+    opacity: 0.7;
+    z-index: -1;
+}
+
+.achievement-text-content {
+    flex-grow: 1;
+}
+
+.achievement-toast-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+    color: #ffd700;
+}
+
+.achievement-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.unlock-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.detail-text {
+    color: #d1d5db;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.achievement-toast-dismiss {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-align: right;
+    font-style: italic;
+}
+
+@keyframes achievement-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes achievement-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.4); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
