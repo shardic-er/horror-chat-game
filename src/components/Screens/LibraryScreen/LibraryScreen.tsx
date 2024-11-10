@@ -5,7 +5,7 @@ import { Container, Row, Col, Form, Card, Badge } from 'react-bootstrap';
 import {useAppDispatch, useAppSelector} from '../../../store/hooks';
 import { Book, getUniqueWordCount, getKnownWordCount } from '../../../types/libraryTypes';
 import { libraryContent } from "../../../assets/library/books";
-import ContentTypeIcon from '../../ContentTypeIcon/ContentTypeIcon';
+import ContentTypeIcon from '../../game/ContentTypeIcon/ContentTypeIcon';
 import { selectKnownWordsSet } from '../../../store/selectors/vocabularySelectors';
 import './LibraryScreen.styles.css';
 import {updateUserState} from "../../../store/slices/gameSlice";
