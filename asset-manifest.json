@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/horror-chat-game/static/css/main.fa5e57b2.css",
-    "main.js": "/horror-chat-game/static/js/main.5458c521.js",
+    "main.css": "/horror-chat-game/static/css/main.2d0b39c3.css",
+    "main.js": "/horror-chat-game/static/js/main.f452068b.js",
     "static/media/IWantToForget.webp": "/horror-chat-game/static/media/IWantToForget.bc4402f6c535273c12b5.webp",
     "static/media/ILoveYouGoodbye4.png": "/horror-chat-game/static/media/ILoveYouGoodbye4.f7a9b0a9f365b73805e5.png",
     "static/media/ILoveYouGoodbye2.png": "/horror-chat-game/static/media/ILoveYouGoodbye2.725d7c8ed1be363b4755.png",
@@ -64,10 +64,14 @@
     "static/media/GreenGrass.svg": "/horror-chat-game/static/media/GreenGrass.3762187103cbffb8383326725945120b.svg",
     "static/media/LockIcon.svg": "/horror-chat-game/static/media/LockIcon.f6208491cbda3e23d0f2889625083d3d.svg",
     "static/media/OneBirdImage.svg": "/horror-chat-game/static/media/OneBirdImage.fcd0b9097dba005aab2108e5a79b58c5.svg",
+    "static/media/BookAdvancedIcon.svg": "/horror-chat-game/static/media/BookAdvancedIcon.2810b9cb8e82a1247abab0f5d098e575.svg",
     "index.html": "/horror-chat-game/index.html",
+    "static/media/BookIntermediateIcon.svg": "/horror-chat-game/static/media/BookIntermediateIcon.d1b063e7bf49bd1967fd678439e1c00c.svg",
+    "static/media/BookBasicIcon.svg": "/horror-chat-game/static/media/BookBasicIcon.34721363b6cfa30ca325b8cde98e8bb5.svg",
     "static/media/BlueSky.svg": "/horror-chat-game/static/media/BlueSky.3e7809f21fc4bf73c8c6d5d3b7c228ac.svg",
     "static/media/TutorialIcon.svg": "/horror-chat-game/static/media/TutorialIcon.2fd679a6891bed351c0bcb3bc470b226.svg",
     "static/media/CountingCoverImage.svg": "/horror-chat-game/static/media/CountingCoverImage.35dcb7a2a9e31e48bd5d25306c459946.svg",
+    "static/media/BookBeginnerIcon.svg": "/horror-chat-game/static/media/BookBeginnerIcon.7107f2560cbfaf51e464aef0da018f33.svg",
     "static/media/ColorsCover.svg": "/horror-chat-game/static/media/ColorsCover.cc7c0b622dbf1fa91c47d8ffba19fbf7.svg",
     "static/media/ForgetModeIcon.svg": "/horror-chat-game/static/media/ForgetModeIcon.fd6f789853087ff639634bb02be09baf.svg",
     "static/media/CircleImage.svg": "/horror-chat-game/static/media/CircleImage.2e15b8dde1b060fbfff3e0b4ab912aa6.svg",
@@ -80,11 +84,11 @@
     "static/media/BookIcon.svg": "/horror-chat-game/static/media/BookIcon.f18b1f11b3692764281ad519890cc14c.svg",
     "static/media/ResetChatIcon.svg": "/horror-chat-game/static/media/ResetChatIcon.21daaf21e02cf9af590882c1c70b7d18.svg",
     "static/media/TerminalIcon.svg": "/horror-chat-game/static/media/TerminalIcon.d76f6d84649e0818ea559e4ca5ab87ab.svg",
-    "main.fa5e57b2.css.map": "/horror-chat-game/static/css/main.fa5e57b2.css.map",
-    "main.5458c521.js.map": "/horror-chat-game/static/js/main.5458c521.js.map"
+    "main.2d0b39c3.css.map": "/horror-chat-game/static/css/main.2d0b39c3.css.map",
+    "main.f452068b.js.map": "/horror-chat-game/static/js/main.f452068b.js.map"
   },
   "entrypoints": [
-    "static/css/main.fa5e57b2.css",
-    "static/js/main.5458c521.js"
+    "static/css/main.2d0b39c3.css",
+    "static/js/main.f452068b.js"
   ]
 }
