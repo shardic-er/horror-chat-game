@@ -1,0 +1,114 @@
+/* src/components/game/MemoryRecovery/MemoryRecovery.styles.css */
+
+.memory-recovery-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.memory-prompt-card {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+.memory-prompt-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.target-words-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.target-word-button {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.target-word-button:not(.recovered):hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.target-word-button.recovered {
+    background: rgba(40, 167, 69, 0.2);
+    border-color: rgba(40, 167, 69, 0.4);
+    cursor: default;
+    opacity: 0.8;
+}
+
+.recovered-checkmark {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #28a745;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.recovered-essays {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.essay-card {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(40, 167, 69, 0.4) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.essay-word {
+    color: #28a745;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.essay-text {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.memory-recovery-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: white;
+}
+
+.memory-recovery-error {
+    color: #dc3545;
+    text-align: center;
+    padding: 2rem;
+}

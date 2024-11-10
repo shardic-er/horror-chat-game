@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { Badge, Form, Card } from 'react-bootstrap';
+import { Badge, Form, Card, Button } from 'react-bootstrap';
 import { addWord, removeWords } from '../../../store/slices/vocabularySlice';
 import { updateUserState } from '../../../store/slices/gameSlice';
 import { ProgressFlag } from '../../../types/gameTypes';
@@ -11,6 +11,11 @@ import { loadUser, saveUser } from '../../../services/userService';
 import {
     PROGRESS_FLAG_DATA
 } from '../../../assets/progressFlags/progressFlags';
+import {
+    resetMemoryRecovery,
+    setWordVariationsEnabled,
+    initializeTargetWords
+} from '../../../store/slices/memoryRecoverySlice';
 import './DebugMode.styles.css';
 
 interface DebugModeProps {
@@ -19,6 +24,7 @@ interface DebugModeProps {
     anchorRef: React.RefObject<HTMLElement>;
 }
 
+
 const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) => {
     const dispatch = useAppDispatch();
     const [newWord, setNewWord] = useState('');
@@ -26,6 +32,8 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
     const knownWords = useAppSelector(state => state.vocabulary.knownWords);
     const forgottenWords = useAppSelector(state => state.vocabulary.forgottenWords);
     const progressFlags = useAppSelector(state => state.game.currentUser?.progressFlags);
+    const wordVariationsEnabled = useAppSelector(state => state.memoryRecovery.wordVariationsEnabled);
+    const targetWords = useAppSelector(state => state.memoryRecovery.targetWords);
 
     const persistVocabularyChanges = (updatedKnownWords: string[], updatedForgottenWords: string[]) => {
         const currentUser = loadUser();
@@ -102,7 +110,6 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
 
     if (!isActive) return null;
 
-    // Get all progress flags from the enum
     const allProgressFlags = Object.values(ProgressFlag);
 
     return createPortal(
@@ -127,6 +134,7 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
                 </div>
 
                 <div className="debug-mode-content">
+                    {/* Progress Flags Card (same as before) */}
                     <Card bg="dark" text="light" className="mb-3">
                         <Card.Header>
                             <h6 className="mb-0">Progress Flags</h6>
@@ -159,6 +167,57 @@ const DebugMode: React.FC<DebugModeProps> = ({ isActive, onClose, anchorRef }) =
                         </Card.Body>
                     </Card>
 
+                    {/* New Memory Recovery Debug Card */}
+                    <Card bg="dark" text="light" className="mb-3">
+                        <Card.Header>
+                            <h6 className="mb-0">Memory Recovery Debug</h6>
+                        </Card.Header>
+                        <Card.Body>
+                            <Form.Check
+                                type="switch"
+                                id="word-variations-toggle"
+                                label="Enable Word Variations"
+                                checked={wordVariationsEnabled}
+                                onChange={(e) => dispatch(setWordVariationsEnabled(e.target.checked))}
+                                className="mb-3"
+                            />
+
+                            <div className="d-flex gap-2 mb-3">
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => dispatch(resetMemoryRecovery())}
+                                >
+                                    Reset Memory Recovery
+                                </Button>
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => dispatch(initializeTargetWords())}
+                                >
+                                    Reinitialize Target Words
+                                </Button>
+                            </div>
+
+                            <div className="target-words-debug">
+                                <h6>Target Words:</h6>
+                                <div className="d-flex flex-wrap gap-2">
+                                    {targetWords.map((tw) => (
+                                        <Badge
+                                            key={tw.word}
+                                            bg={tw.recovered ? 'success' : 'secondary'}
+                                            className="debug-word-badge"
+                                        >
+                                            {tw.word}
+                                            {tw.recovered && ' ✓'}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        </Card.Body>
+                    </Card>
+
+                    {/* Vocabulary Management Card (same as before) */}
                     <Card bg="dark" text="light">
                         <Card.Header>
                             <h6 className="mb-0">Vocabulary Management</h6>

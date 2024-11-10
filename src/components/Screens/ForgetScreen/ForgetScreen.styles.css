@@ -13,11 +13,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('../../../assets/images/IWantToForget.webp');
     background-size: cover;
     background-position: center;
     filter: brightness(0.3);
     z-index: 0;
+    transition: background-image 0.5s ease;
 }
 
 .forget-content {
@@ -26,15 +26,15 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     padding: 2rem;
+    overflow-y: auto;
 }
 
 .progress-section {
     text-align: center;
     color: white;
     max-width: 600px;
-    margin: 0 auto;
+    margin: 0 auto 2rem;
 }
 
 .progress-section h2 {
@@ -49,8 +49,66 @@
     opacity: 0.8;
 }
 
+.interaction-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    flex-grow: 1;
+}
+
+.recovery-interface {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .trash-section {
     max-width: 800px;
-    margin: 2rem auto;
+    margin: 0 auto;
     width: 100%;
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recovery-interface {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .forget-content {
+        padding: 1rem;
+    }
+
+    .interaction-section {
+        gap: 1rem;
+    }
+}
+
+/* Scrollbar styling */
+.forget-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.forget-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.forget-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.forget-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
