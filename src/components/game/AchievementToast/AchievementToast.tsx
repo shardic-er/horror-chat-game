@@ -34,48 +34,58 @@ const AchievementToast = () => {
         }, 500);
     };
 
+    // Add keyboard handler for ESC key
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && visible) {
+                handleDismiss();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [visible]);
+
     if (!visible || !currentAchievement) return null;
 
-    const toastContent = (
+    const achievement = PROGRESS_FLAG_DATA[currentAchievement];
+
+    return createPortal(
         <div className="achievement-toast-container">
             <div
                 className={`achievement-toast ${isExiting ? 'exit' : 'enter'}`}
                 onClick={handleDismiss}
+                role="alert"
+                tabIndex={0} // Make the toast focusable
             >
-                <div className="achievement-toast-header">
-                    <div className="achievement-icon-container">
-                        {(() => {
-                            const FlagIcon = PROGRESS_FLAG_DATA[currentAchievement].Icon;
-                            return <FlagIcon width={32} height={32} />;
-                        })()}
+                <div className="achievement-header">
+                    <div className="achievement-icon-wrapper">
+                        <achievement.Icon width={32} height={32} />
                     </div>
-                    <div className="achievement-text-content">
-                        <h3 className="achievement-toast-title">
-                            {PROGRESS_FLAG_DATA[currentAchievement].name}
-                        </h3>
-                        <div className="achievement-details">
-                            <div className="unlock-detail">
-                                <span className="detail-label">Unlocked:</span>
-                                <span className="detail-text">
-                                {PROGRESS_FLAG_DATA[currentAchievement].description}
-                            </span>
-                            </div>
-                            <div className="unlock-detail">
-                                <span className="detail-label">Condition:</span>
-                                <span className="detail-text">
-                                {PROGRESS_FLAG_DATA[currentAchievement].unlockCondition}
-                            </span>
-                            </div>
+                    <div className="achievement-title-section">
+                        <div className="achievement-name">
+                            {'>'} {achievement.name}
+                        </div>
+                        <div className="detail-text">
+                            {achievement.unlockCondition}
                         </div>
                     </div>
                 </div>
 
-                <div className="achievement-toast-dismiss">Click to dismiss</div>
-            </div>
-        </div>
-    );
+                <div className="achievement-details">
+                    <div className="detail-item">
+                        <span className="detail-label">System Report</span>
+                        <span className="detail-text">{achievement.description}</span>
+                    </div>
+                </div>
 
-    return createPortal(toastContent, document.body);
+                <div className="achievement-footer">
+                    <span className="key-command">[ESC]</span> TO DISMISS
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
 };
 
 export default AchievementToast;

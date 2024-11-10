@@ -10,121 +10,306 @@
     max-width: 32rem;
     padding: 0 1rem;
     pointer-events: none;
+    font-family: 'Courier New', monospace;
 }
 
 .achievement-toast {
-    background-color: #1f2937;
-    color: #ffffff;
-    border-radius: 0.5rem;
+    background-color: rgba(0, 8, 12, 0.95);
+    color: #33ff33;
+    border-radius: 0.375rem;
     padding: 1.5rem;
     cursor: pointer;
     pointer-events: auto;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    animation: achievement-float 3s ease-in-out infinite, achievement-glow 2s ease-in-out infinite;
-    transition: all 0.5s ease-out;
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.achievement-toast.enter {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.achievement-toast.exit {
-    transform: translateY(100%);
-    opacity: 0;
-}
-
-.achievement-toast-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.achievement-icon-container {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    backdrop-filter: blur(8px);
     position: relative;
-    flex-shrink: 0;
+    overflow: hidden;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
 }
 
-.achievement-icon-container::after {
+/* Terminal scanline effect */
+.achievement-toast::before {
     content: '';
     position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: conic-gradient(
-            from 0deg,
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
             transparent 0%,
-            #ffd700 50%,
+            rgba(32, 128, 32, 0.05) 50%,
             transparent 100%
     );
-    animation: rotate 2s linear infinite;
-    opacity: 0.7;
+    background-size: 100% 4px;
+    animation: scan 8s linear infinite;
+    pointer-events: none;
+}
+
+/* Glitch effects */
+.achievement-toast::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    border-radius: inherit;
     z-index: -1;
 }
 
-.achievement-text-content {
+.achievement-toast.enter {
+    animation: glitch-enter 1s ease forwards, terminal-glow 2s ease-in-out infinite;
+}
+
+.achievement-toast.exit {
+    animation: glitch-exit 0.5s ease forwards;
+}
+
+.achievement-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.achievement-icon-wrapper {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(34, 197, 94, 0.1);
+    position: relative;
+    flex-shrink: 0;
+    animation: terminal-pulse 2s ease-in-out infinite;
+    border: 1px solid rgba(51, 255, 51, 0.3);
+}
+
+.achievement-icon-wrapper svg {
+    width: 2rem;
+    height: 2rem;
+    color: #33ff33;
+    opacity: 0.9;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 5px rgba(51, 255, 51, 0.5));
+}
+
+.achievement-title-section {
     flex-grow: 1;
 }
 
-.achievement-toast-title {
-    font-size: 1.25rem;
+.achievement-unlock-text {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #33ff33;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
+}
+
+.achievement-name {
+    font-size: 1rem;
     font-weight: bold;
-    margin-bottom: 0.75rem;
-    color: #ffd700;
+    color: #33ff33;
+    margin: 0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .achievement-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    text-transform: uppercase;
+    margin-top: 1rem;
+    border-top: 1px solid rgba(51, 255, 51, 0.2);
+    padding-top: 1rem;
 }
 
-.unlock-detail {
+.detail-item {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
 }
 
 .detail-label {
     font-size: 0.75rem;
     text-transform: uppercase;
-    color: #9ca3af;
-    font-weight: 500;
+    color: #33ff33;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+    opacity: 0.8;
+}
+
+.detail-label::before {
+    content: '>';
+    margin-right: 0.5rem;
+    opacity: 0.7;
 }
 
 .detail-text {
-    color: #d1d5db;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+    color: rgba(51, 255, 51, 0.9);
     line-height: 1.4;
+    padding-left: 1.25rem;
 }
 
-.achievement-toast-dismiss {
+.achievement-footer {
     margin-top: 1rem;
-    font-size: 0.75rem;
-    color: #9ca3af;
     text-align: right;
+    font-size: 0.75rem;
+    color: rgba(51, 255, 51, 0.5);
     font-style: italic;
 }
 
-@keyframes achievement-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+/* Animation keyframes */
+@keyframes scan {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 0 100%;
+    }
 }
 
-@keyframes achievement-glow {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
-    50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.4); }
+@keyframes glitch-enter {
+    0% {
+        clip-path: inset(100% 0 0 0);
+        transform: translateY(10%);
+        opacity: 0;
+    }
+    20% {
+        clip-path: inset(45% 0 45% 0);
+        transform: translateY(5%);
+    }
+    40% {
+        clip-path: inset(30% 0 30% 0);
+        transform: translateY(2%);
+    }
+    60% {
+        clip-path: inset(15% 0 15% 0);
+        transform: translateY(1%);
+    }
+    80% {
+        clip-path: inset(5% 0 5% 0);
+        transform: translateY(0%);
+    }
+    100% {
+        clip-path: inset(0 0 0 0);
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+@keyframes glitch-exit {
+    0% {
+        clip-path: inset(0 0 0 0);
+        transform: translateY(0);
+        opacity: 1;
+    }
+    20% {
+        clip-path: inset(5% 0 5% 0);
+        transform: translateY(2%);
+    }
+    40% {
+        clip-path: inset(15% 0 15% 0);
+        transform: translateY(4%);
+    }
+    60% {
+        clip-path: inset(30% 0 30% 0);
+        transform: translateY(6%);
+    }
+    80% {
+        clip-path: inset(45% 0 45% 0);
+        transform: translateY(8%);
+    }
+    100% {
+        clip-path: inset(0 0 100% 0);
+        transform: translateY(10%);
+        opacity: 0;
+    }
+}
+
+@keyframes terminal-glow {
+    0%, 100% {
+        box-shadow:
+                0 0 20px rgba(34, 197, 94, 0.2),
+                inset 0 0 10px rgba(51, 255, 51, 0.1);
+    }
+    50% {
+        box-shadow:
+                0 0 30px rgba(34, 197, 94, 0.4),
+                inset 0 0 15px rgba(51, 255, 51, 0.2);
+    }
+}
+
+@keyframes terminal-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 rgba(51, 255, 51, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(51, 255, 51, 0.6);
+        transform: scale(1.05);
+    }
+}
+
+/* CRT flicker effect */
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.95; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.95; }
+    20% { opacity: 0.98; }
+    25% { opacity: 0.95; }
+    30% { opacity: 0.9; }
+    35% { opacity: 0.95; }
+    40% { opacity: 0.98; }
+    45% { opacity: 0.95; }
+    50% { opacity: 0.97; }
+    55% { opacity: 0.95; }
+    60% { opacity: 0.93; }
+    65% { opacity: 0.95; }
+    70% { opacity: 0.98; }
+    75% { opacity: 0.97; }
+    80% { opacity: 0.94; }
+    85% { opacity: 0.95; }
+    90% { opacity: 0.98; }
+    95% { opacity: 0.96; }
+    100% { opacity: 0.95; }
+}
+
+/* Add to your existing CSS */
+
+.key-command {
+    color: #33ff33;
+    font-weight: bold;
+    background-color: rgba(51, 255, 51, 0.1);
+    padding: 0.1rem 0.3rem;
+    border: 1px solid rgba(51, 255, 51, 0.3);
+    border-radius: 0.2rem;
+    margin-right: 0.5rem;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
+}
+
+.achievement-footer {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 0.75rem;
+    color: rgba(51, 255, 51, 0.7);
+    font-style: normal;
+    letter-spacing: 0.1em;
+}
+
+.achievement-toast {
+    /* Add to existing .achievement-toast styles */
+    outline: none; /* Remove focus outline */
+}
+
+.achievement-toast:focus {
+    /* Optional: add a subtle focus indicator that matches the terminal theme */
+    box-shadow: 0 0 0 2px rgba(51, 255, 51, 0.3);
 }

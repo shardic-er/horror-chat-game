@@ -16,9 +16,9 @@ export interface ProgressFlagData {
 
 export const PROGRESS_FLAG_DATA: Record<ProgressFlag, ProgressFlagData> = {
     [ProgressFlag.COMPLETED_DELETIONS]: {
-        name: 'Master of Deletion',
-        description: 'You have helped identify and remove 100 incorrect word variations, unlocking new abilities.',
-        unlockCondition: 'Remove 100 incorrect word variations',
+        name: 'Sunshine of the Spotless Mind',
+        description: 'The elephant has something for you, you should go and see him.',
+        unlockCondition: 'Identify and remove 100 incorrect word variations.',
         debugDescription: 'Marks typo deletion quota as complete (100 deletions)',
         Icon: ForgetModeIcon
     },
