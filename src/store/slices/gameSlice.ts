@@ -4,10 +4,10 @@ import {AppDispatch, RootState} from '../../types/store.types';
 import {AIPartner, ChatError, ChatHistory, ChatMessage, UserData} from '../../types/gameTypes';
 import {createNewUser, loadUser, saveUser, updateUser} from '../../services/userService';
 import {LLMClient} from '../../services/llmClient';
-import {CHAT_PARTNERS} from '../../config/aiPartners';
 import {getApiKey} from '../../services/apiKeyService';
 import {setProgressFlags} from './vocabularySlice';
 import GameLogger from "../../services/loggerService";
+import {CHAT_PARTNERS} from "../../assets/partners/partners";
 
 export interface ChatState {
     isLoading: boolean;

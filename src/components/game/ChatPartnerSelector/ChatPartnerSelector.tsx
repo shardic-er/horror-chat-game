@@ -2,11 +2,13 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { createSelector } from '@reduxjs/toolkit';
 import { setCurrentPartner, resetChatHistory } from '../../../store/slices/gameSlice';
-import { CHAT_PARTNERS, ChatPartner } from '../../../config/aiPartners';
 import { ProgressFlag } from '../../../types/gameTypes';
 import { RootState } from '../../../types/store.types';
 import { ReactComponent as ResetChatIcon } from '../../../assets/images/ResetChatIcon.svg';
+import { ReactComponent as LockIcon } from '../../../assets/images/LockIcon.svg';
 import './ChatPartnerSelector.styles.css';
+import {ChatPartner} from "../../../types/partnerTypes";
+import {CHAT_PARTNERS} from "../../../assets/partners/partners";
 
 // Memoized selectors
 const selectCurrentPartnerId = (state: RootState) => state.game.currentPartnerId;
@@ -152,37 +154,22 @@ const ChatPartnerSelector: React.FC = () => {
                             onClick={() => handlePartnerSelect(partner)}
                             disabled={availability === 'locked'}
                             title={getPartnerTooltip(partner)}
+                            data-partner={partner.id}
                             style={{
                                 '--partner-bg': partner.style.backgroundColor,
                                 '--partner-text': partner.style.textColor,
                                 '--partner-accent': partner.style.accentColor,
                             } as React.CSSProperties}
                         >
-                            <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="partner-icon"
-                            >
-                                <path d={partner.icon} />
-                            </svg>
-                            <span className="partner-name">{partner.name}</span>
+                            <div className="content-container">
+                                <partner.icon
+                                    className="partner-icon"
+                                    aria-hidden="true"
+                                />
+                                <span className="partner-name">{partner.name}</span>
+                            </div>
                             {availability === 'locked' && (
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="lock-icon"
-                                >
-                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                    <path d="M7 11V7a5 5 0 0110 0v4" />
-                                </svg>
+                                <LockIcon className="lock-icon" />
                             )}
                         </button>
                     );
