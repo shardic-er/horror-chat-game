@@ -133,29 +133,6 @@ const calculateWordLimit = (vocabularySize: number): number => {
     return Math.floor(Math.sqrt(vocabularySize));
 };
 
-const getUserVocabulary = (): string[] => {
-    const userData = loadUser();
-    return userData?.vocabulary || ['the', 'a', 'is', 'in', 'it', 'you', 'i', 'to', 'and', 'of'];
-};
-
-const getUserForgottenWords = (): string[] => {
-    const userData = loadUser();
-    return userData?.forgottenWords || [];
-};
-
-const getUserTypoCount = (): number => {
-    const userData = loadUser();
-    return userData?.validatedTypoCount || 0;
-};
-
-const initialState: VocabularySlice = {
-    knownWords: getUserVocabulary(),
-    forgottenWords: getUserForgottenWords(),
-    validatedTypoCount: getUserTypoCount(),
-    wordLimit: calculateWordLimit(getUserVocabulary().length),
-    isProcessingVariations: false
-};
-
 const vocabularySlice = createSlice({
     name: 'vocabulary',
     initialState: getInitialState(),
@@ -333,6 +310,33 @@ export const forgetWords = (words: string[]) =>
             // Remove words and update state
             dispatch(removeWords(wordsToForget));
 
+            GameLogger.logGameState({
+                type: 'Memory Recovery',
+                action: 'Pre-Event Dispatch',
+                wordsToForget,
+                currentState: {
+                    forgottenWords: getState().vocabulary.forgottenWords,
+                    currentTarget: getState().memoryRecovery.targetWords
+                }
+            });
+
+            // Try both document and window
+            const event = new CustomEvent('wordForgotten', {
+                detail: { words: wordsToForget },
+                bubbles: true,
+                composed: true
+            });
+
+            document.dispatchEvent(event);
+            window.dispatchEvent(event);
+
+            GameLogger.logGameState({
+                type: 'Memory Recovery',
+                action: 'Post-Event Dispatch',
+                eventDispatched: true,
+                words: wordsToForget
+            });
+
             if (validTypoCount > 0) {
                 dispatch(updateTypoCount(validTypoCount));
 
@@ -402,6 +406,23 @@ export const forgetWords = (words: string[]) =>
 
             // In case of error, proceed with deletion but don't increment typo count
             dispatch(removeWords(wordsToForget));
+
+            const dispatchWordForgottenEvent = (words: string[]) => {
+                GameLogger.logGameState({
+                    type: 'Memory Recovery',
+                    action: 'Dispatching Forgotten Event',
+                    words
+                });
+
+                const event = new CustomEvent('wordForgotten', {
+                    detail: { words },
+                    bubbles: true
+                });
+                window.dispatchEvent(event);
+            };
+
+            dispatchWordForgottenEvent(wordsToForget);
+
         }
     };
 

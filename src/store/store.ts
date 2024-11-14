@@ -21,7 +21,10 @@ export const store = configureStore({
                     'persist/REHYDRATE',
                     'game/initializeGame',
                     'memoryRecovery/initialize',
-                    'memoryRecovery/generateEssay'
+                    'memoryRecovery/generateEssay',
+                    'vocabulary/addWord',
+                    'vocabulary/addWords',
+                    'vocabulary/removeWords'
                 ],
                 ignoredActionPaths: [
                     'payload.createdAt',
@@ -31,11 +34,9 @@ export const store = configureStore({
                 ignoredPaths: [
                     'game.currentUser.createdAt',
                     'game.currentUser.lastLoginDate',
-                    'memoryRecovery.targetWords'
+                    'memoryRecovery.targetWords',
+                    'game.availablePartners'
                 ],
             },
         })
 });
-
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;

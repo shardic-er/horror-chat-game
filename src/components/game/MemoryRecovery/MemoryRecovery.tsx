@@ -29,34 +29,47 @@ const MemoryRecovery: React.FC = () => {
         }
     }, [dispatch, isInitialized, isLoading]);
 
-    // Listen for word forgotten events
     useEffect(() => {
+        // Log target words on mount and when they change
+        GameLogger.logGameState({
+            type: 'Memory Recovery',
+            action: 'Current Target Words State',
+            targetWords: targetWords.map(tw => ({
+                word: tw.word,
+                recovered: tw.recovered,
+                hasEssay: !!tw.essay
+            }))
+        });
+
         const handleWordForgotten = (event: Event) => {
             const customEvent = event as WordForgottenEvent;
             const { words } = customEvent.detail;
-            if (words.length === 0) return;
 
-            const word = words[0];
-            const targetWord = targetWords.find(tw =>
-                tw.word.toLowerCase() === word.toLowerCase()
-            );
+            GameLogger.logGameState({
+                type: 'Memory Recovery',
+                action: 'Word Forgotten Handler',
+                forgottenWords: words,
+                availableTargets: targetWords.map(tw => ({
+                    word: tw.word,
+                    recovered: tw.recovered,
+                    isMatch: words.includes(tw.word.toLowerCase())
+                }))
+            });
 
-            if (targetWord && !targetWord.recovered) {
-                GameLogger.logGameState({
-                    type: 'Memory Recovery',
-                    action: 'Word Forgotten Event',
-                    word: word,
-                    isTargetWord: !!targetWord
-                });
+            for (const word of words) {
+                const targetWord = targetWords.find(tw =>
+                    tw.word.toLowerCase() === word.toLowerCase()
+                );
 
-                dispatch(forgetAndRecover(word));
+                if (targetWord && !targetWord.recovered) {
+                    dispatch(forgetAndRecover(word));
+                    break;
+                }
             }
         };
 
         window.addEventListener('wordForgotten', handleWordForgotten);
-        return () => {
-            window.removeEventListener('wordForgotten', handleWordForgotten);
-        };
+        return () => window.removeEventListener('wordForgotten', handleWordForgotten);
     }, [dispatch, targetWords]);
 
     if (isLoading) {
