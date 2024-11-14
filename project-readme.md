@@ -7,7 +7,7 @@ Players take on the role of a digitalized consciousness struggling to reconstruc
 
 ## Core Mechanics
 - Limited vocabulary system starting with only 10 basic words
-- Token-limited chat interface
+- Word-limited chat interface
 - Word discovery through context and guessing
 - Multiple AI personalities with unique conversation patterns
 - Progressive narrative revelation through successful interactions
