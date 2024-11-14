@@ -1,5 +1,3 @@
-// src/components/game/MemoryRecovery/MemoryRecovery.tsx
-
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import {
@@ -7,10 +5,16 @@ import {
     selectTargetWords,
     selectIsInitialized,
     selectIsLoading,
-    selectError
+    selectError,
+    forgetAndRecover
 } from '../../../store/slices/memoryRecoverySlice';
 import { Card, Spinner } from 'react-bootstrap';
 import './MemoryRecovery.styles.css';
+import GameLogger from '../../../services/loggerService';
+
+interface WordForgottenEvent extends CustomEvent {
+    detail: { words: string[] };
+}
 
 const MemoryRecovery: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -24,6 +28,36 @@ const MemoryRecovery: React.FC = () => {
             dispatch(initializeTargetWords());
         }
     }, [dispatch, isInitialized, isLoading]);
+
+    // Listen for word forgotten events
+    useEffect(() => {
+        const handleWordForgotten = (event: Event) => {
+            const customEvent = event as WordForgottenEvent;
+            const { words } = customEvent.detail;
+            if (words.length === 0) return;
+
+            const word = words[0];
+            const targetWord = targetWords.find(tw =>
+                tw.word.toLowerCase() === word.toLowerCase()
+            );
+
+            if (targetWord && !targetWord.recovered) {
+                GameLogger.logGameState({
+                    type: 'Memory Recovery',
+                    action: 'Word Forgotten Event',
+                    word: word,
+                    isTargetWord: !!targetWord
+                });
+
+                dispatch(forgetAndRecover(word));
+            }
+        };
+
+        window.addEventListener('wordForgotten', handleWordForgotten);
+        return () => {
+            window.removeEventListener('wordForgotten', handleWordForgotten);
+        };
+    }, [dispatch, targetWords]);
 
     if (isLoading) {
         return (

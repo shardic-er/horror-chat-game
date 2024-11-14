@@ -6,6 +6,7 @@ import { LLMClient } from '../../services/llmClient';
 import { AppDispatch, RootState } from '../../types/store.types';
 import { addWords } from './vocabularySlice';
 import GameLogger from '../../services/loggerService';
+import { forgetWords } from './vocabularySlice';
 
 export interface TargetWord {
     word: string;
@@ -42,6 +43,106 @@ const ESSAY_PROMPT = `You are the subconscious ghost of an amnesiac woman, writi
 
 Word to write about: `;
 
+// Helper function to extract words from essay text
+const extractWords = (text: string): string[] => {
+    return text
+        .toLowerCase()
+        .replace(/[.,!?;:'"]/g, '')
+        .split(/\s+/)
+        .filter(word => word.length > 2);  // Filter out very short words
+};
+
+export const forgetAndRecover = createAsyncThunk<
+    void,
+    string,
+    {
+        dispatch: AppDispatch;
+        state: RootState;
+    }
+    >(
+    'memoryRecovery/forgetAndRecover',
+    async (word: string, { dispatch, getState }) => {
+        GameLogger.logGameState({
+            type: 'Memory Recovery',
+            action: 'Starting forgetAndRecover',
+            word
+        });
+
+        const state = getState();
+        const targetWord = state.memoryRecovery.targetWords.find(tw =>
+            tw.word.toLowerCase() === word.toLowerCase()
+        );
+
+        if (!targetWord || targetWord.recovered) {
+            GameLogger.logGameState({
+                type: 'Memory Recovery',
+                action: 'Skipped',
+                word,
+                reason: targetWord ? 'Already recovered' : 'Not a target word'
+            });
+            return;
+        }
+
+        try {
+            GameLogger.logGameState({
+                type: 'Memory Recovery',
+                action: 'Forgetting word',
+                word
+            });
+
+            // First forget the word
+            await dispatch(forgetWords([word]));
+
+            // Generate the memory essay
+            GameLogger.logGameState({
+                type: 'Memory Recovery',
+                action: 'Generating essay',
+                word
+            });
+
+            const result = await dispatch(generateMemoryEssay(word)).unwrap();
+
+            if (result.essay) {
+                GameLogger.logGameState({
+                    type: 'Memory Recovery',
+                    action: 'Essay generated',
+                    word,
+                    essayLength: result.essay.length
+                });
+
+                // Add variations to vocabulary if enabled
+                if (state.memoryRecovery.wordVariationsEnabled) {
+                    const wordsFromEssay = extractWords(result.essay);
+
+                    GameLogger.logGameState({
+                        type: 'Memory Recovery',
+                        action: 'Adding variations',
+                        word,
+                        variations: wordsFromEssay
+                    });
+
+                    await dispatch(addWords(wordsFromEssay));
+
+                    // Dispatch event for word collection animation
+                    const event = new CustomEvent('wordDiscovered', {
+                        detail: {
+                            words: wordsFromEssay
+                        }
+                    });
+                    document.dispatchEvent(event);
+                }
+
+                dispatch(markWordRecovered({ word, essay: result.essay }));
+            }
+        } catch (error) {
+            GameLogger.logError('Word Recovery Process Failed', {
+                word,
+                error
+            });
+            throw error;
+        }
+    }
+);
 export const initializeTargetWords = createAsyncThunk(
     'memoryRecovery/initialize',
     async (_, { rejectWithValue }) => {
@@ -75,7 +176,11 @@ export const initializeTargetWords = createAsyncThunk(
     }
 );
 
-export const generateMemoryEssay = createAsyncThunk(
+export const generateMemoryEssay = createAsyncThunk<
+    { word: string; essay: string },
+    string,
+    { rejectValue: string }
+    >(
     'memoryRecovery/generateEssay',
     async (word: string, { rejectWithValue }) => {
         const apiKey = getApiKey();
@@ -103,51 +208,6 @@ export const generateMemoryEssay = createAsyncThunk(
         }
     }
 );
-
-// Helper function to extract words from essay text
-const extractWords = (text: string): string[] => {
-    return text
-        .toLowerCase()
-        .replace(/[.,!?;:'"]/g, '')
-        .split(/\s+/)
-        .filter(word => word.length > 2);  // Filter out very short words
-};
-
-// Thunk to handle the complete word recovery process
-export const recoverWord = (word: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
-    const state = getState();
-    const targetWord = state.memoryRecovery.targetWords.find(tw =>
-        tw.word.toLowerCase() === word.toLowerCase()
-    );
-
-    if (!targetWord || targetWord.recovered) {
-        return;
-    }
-
-    try {
-        const result = await dispatch(generateMemoryEssay(word)).unwrap();
-        if (result.essay) {
-            // Only add words to vocabulary if variations are enabled
-            if (state.memoryRecovery.wordVariationsEnabled) {
-                const wordsFromEssay = extractWords(result.essay);
-                dispatch(addWords(wordsFromEssay));
-            }
-
-            dispatch(markWordRecovered({ word, essay: result.essay }));
-
-            // Dispatch event for word collection animation
-            const event = new CustomEvent('wordDiscovered', {
-                detail: {
-                    words: state.memoryRecovery.wordVariationsEnabled ? extractWords(result.essay) : [word]
-                }
-            });
-            document.dispatchEvent(event);
-        }
-    } catch (error) {
-        GameLogger.logError('Word Recovery', error);
-    }
-};
-
 
 const memoryRecoverySlice = createSlice({
     name: 'memoryRecovery',
