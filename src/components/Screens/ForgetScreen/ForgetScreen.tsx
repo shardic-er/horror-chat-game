@@ -1,5 +1,3 @@
-// src/components/Screens/ForgetScreen/ForgetScreen.tsx
-
 import React from 'react';
 import { useAppSelector } from '../../../store/hooks';
 import { selectMistakeProgress } from '../../../store/slices/vocabularySlice';
@@ -25,13 +23,13 @@ const ForgetScreen: React.FC = () => {
                 }}
             />
             <div className="forget-content">
-                {!mistakeProgress.isComplete && (
+                {!completedDeletions && !mistakeProgress.isComplete && (
                     <div className="progress-section">
                         <h2>Mistakes Cleared</h2>
                         <ProgressBar
                             current={mistakeProgress.current}
                             max={mistakeProgress.max}
-                            variant={completedDeletions ? 'success' : 'default'}
+                            variant="default"
                         />
                         <p className="progress-text">
                             {mistakeProgress.current} / {mistakeProgress.max} mistakes cleared
