@@ -18,9 +18,12 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     pointer-events: auto;
     backdrop-filter: blur(8px);
-    max-height: calc(100vh - 100px);
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
+    top: 10vh;  /* Position 10% from top */
+    height: 80vh; /* Take up 80% of viewport height */
+    overflow: auto; /* Enable scrolling */
 }
 
 .debug-mode-header {
@@ -35,6 +38,10 @@
 .debug-mode-content {
     padding: 1rem;
     overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .close-button {
@@ -159,6 +166,17 @@
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
+/* Make cards scrollable independently */
+.debug-mode-content .card {
+    max-height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.debug-mode-content .card-body {
+    overflow-y: auto;
+}
+
 /* Word List Section */
 .word-list {
     max-height: 200px;
@@ -166,18 +184,31 @@
     padding-right: 0.5rem;
 }
 
+/* Enhanced scrollbar styling */
+.debug-mode-content::-webkit-scrollbar,
+.card-body::-webkit-scrollbar,
 .word-list::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
+.debug-mode-content::-webkit-scrollbar-track,
+.card-body::-webkit-scrollbar-track,
 .word-list::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
+.debug-mode-content::-webkit-scrollbar-thumb,
+.card-body::-webkit-scrollbar-thumb,
 .word-list::-webkit-scrollbar-thumb {
     background: var(--bs-danger);
-    border-radius: 3px;
+    border-radius: 4px;
+}
+
+.debug-mode-content::-webkit-scrollbar-thumb:hover,
+.card-body::-webkit-scrollbar-thumb:hover,
+.word-list::-webkit-scrollbar-thumb:hover {
+    background: #dc3545;
 }
 
 .debug-word-badge {
@@ -188,8 +219,8 @@
 .debug-word-badge:hover {
     background-color: var(--bs-danger) !important;
 }
-/* Add to your existing DebugMode.styles.css */
 
+/* Target Words Debug Section */
 .target-words-debug {
     margin-top: 1rem;
     padding-top: 1rem;
@@ -201,7 +232,6 @@
     margin-bottom: 0.5rem;
 }
 
-/* Style for badges in the target words section */
 .target-words-debug .debug-word-badge {
     font-size: 0.9rem;
     padding: 0.4rem 0.8rem;
@@ -212,7 +242,7 @@
     opacity: 0.8;
 }
 
-/* Style for the form switch */
+/* Form Switch */
 .form-switch {
     padding-left: 2.5rem;
 }
@@ -227,7 +257,7 @@
     border-color: #28a745;
 }
 
-/* Style for the debug action buttons */
+/* Debug Action Buttons */
 .debug-mode-content .btn-outline-danger,
 .debug-mode-content .btn-outline-primary {
     color: rgba(255, 255, 255, 0.9);
