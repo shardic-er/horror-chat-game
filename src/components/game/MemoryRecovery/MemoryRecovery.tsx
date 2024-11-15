@@ -42,6 +42,7 @@ const MemoryRecovery: React.FC = () => {
         });
 
         const handleWordForgotten = (event: Event) => {
+            event.stopPropagation();
             const customEvent = event as WordForgottenEvent;
             const { words } = customEvent.detail;
 
@@ -68,8 +69,8 @@ const MemoryRecovery: React.FC = () => {
             }
         };
 
-        window.addEventListener('wordForgotten', handleWordForgotten);
-        return () => window.removeEventListener('wordForgotten', handleWordForgotten);
+        document.addEventListener('wordForgotten', handleWordForgotten);
+        return () => document.removeEventListener('wordForgotten', handleWordForgotten);
     }, [dispatch, targetWords]);
 
     if (isLoading) {

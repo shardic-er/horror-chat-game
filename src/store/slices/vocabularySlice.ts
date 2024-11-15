@@ -1,5 +1,3 @@
-// src/store/slices/vocabularySlice.ts
-
 import {createSlice, createAsyncThunk, createAction} from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from '../../types/store.types';
 import { loadUser, saveUser} from '../../services/userService';
@@ -12,8 +10,6 @@ import GameLogger from "../../services/loggerService";
 import { createSelector } from '@reduxjs/toolkit';
 import { storage } from '../../services/storageService';
 import { initializeProgressFlags, ensureCompleteFlags } from '../../utils/progressFlags';
-
-
 
 export interface VocabularySlice {
     knownWords: string[];
@@ -49,44 +45,47 @@ const getInitialState = (): VocabularySlice => {
     };
 };
 
-// Helper function to determine which book flags should be unlocked
+// Helper for determining book access flags
 const determineBookAccess = (
     vocabularySize: number,
     currentFlags: Partial<Record<ProgressFlag, boolean>>
 ): Record<ProgressFlag, boolean> => {
-    // Start with a complete set of flags
     const flags = ensureCompleteFlags(currentFlags);
 
-    // Update flags based on vocabulary size
     flags[ProgressFlag.BASIC_BOOKS_UNLOCKED] =
         vocabularySize >= VOCABULARY_THRESHOLDS.BASIC;
-
     flags[ProgressFlag.INTERMEDIATE_BOOKS_UNLOCKED] =
         vocabularySize >= VOCABULARY_THRESHOLDS.INTERMEDIATE;
-
     flags[ProgressFlag.ADVANCED_BOOKS_UNLOCKED] =
         vocabularySize >= VOCABULARY_THRESHOLDS.ADVANCED;
 
     return flags;
 };
 
-const dispatchWordForgottenEvent = (words: string[]) => {
-    const event = new CustomEvent('wordForgotten', {
-        detail: { words }
+// Event dispatch helpers
+const dispatchWordEvent = (eventName: 'wordForgotten' | 'wordDiscovered', words: string[]) => {
+    GameLogger.logGameState({
+        type: 'Memory Recovery',
+        action: `Dispatching ${eventName} Event`,
+        words
     });
+
+    const event = new CustomEvent(eventName, {
+        detail: { words },
+        bubbles: false // Prevent event bubbling
+    });
+
     document.dispatchEvent(event);
 };
 
-// Memoized base selectors
+const calculateWordLimit = (vocabularySize: number): number => {
+    return Math.floor(Math.sqrt(vocabularySize));
+};
+
+// Memoized base selector
 const selectValidatedTypoCount = (state: RootState) => state.vocabulary.validatedTypoCount;
 
-const dispatchWordDiscoveredEvent = (words: string[]) => {
-    const event = new CustomEvent('wordDiscovered', {
-        detail: { words }
-    });
-    document.dispatchEvent(event);
-};
-
+// Word variations thunk
 export const getWordVariations = createAsyncThunk(
     'vocabulary/getVariations',
     async (word: string) => {
@@ -94,15 +93,15 @@ export const getWordVariations = createAsyncThunk(
         if (!apiKey) throw new Error('API key not found');
 
         const llmClient = new LLMClient(apiKey);
-        const systemPrompt = `You are a linguistic assistant. Given a word, respond only with a JSON array of its most common and natural inflections or derived forms based on its primary part of speech (verb, noun, adjective, or adverb). Do not include synonyms or related words. Focus on relevant forms such as plurals for nouns, tenses for verbs, comparative/superlative for adjectives, and standard variations for adverbs. Exclude rare or uncommon forms.`
-        const prompt = `Given the word "${word}", provide a JSON array of its common and natural variations according to the instructions.`
+        const systemPrompt = `You are a linguistic assistant. Given a word, respond only with a JSON array of its most common and natural inflections or derived forms based on its primary part of speech (verb, noun, adjective, or adverb). Do not include synonyms or related words. Focus on relevant forms such as plurals for nouns, tenses for verbs, comparative/superlative for adjectives, and standard variations for adverbs. Exclude rare or uncommon forms.`;
+        const prompt = `Given the word "${word}", provide a JSON array of its common and natural variations according to the instructions.`;
 
         try {
             const response = await llmClient.generateResponse(
                 {
                     id: 'vocabulary',
                     name: 'VOCABULARY',
-                    systemPrompt: systemPrompt,
+                    systemPrompt,
                     maxInputTokens: 100,
                     maxOutputTokens: 100,
                     temperature: 0.1
@@ -128,10 +127,6 @@ export const getWordVariations = createAsyncThunk(
         }
     }
 );
-
-const calculateWordLimit = (vocabularySize: number): number => {
-    return Math.floor(Math.sqrt(vocabularySize));
-};
 
 const vocabularySlice = createSlice({
     name: 'vocabulary',
@@ -164,13 +159,11 @@ const vocabularySlice = createSlice({
             state.forgottenWords.push(...wordsToRemove);
             state.wordLimit = calculateWordLimit(state.knownWords.length);
 
-            // Update storage
             storage.setVocabulary(state.knownWords);
             storage.setForgottenWords(state.forgottenWords);
         },
         updateTypoCount: (state, action) => {
             state.validatedTypoCount = Math.min(100, state.validatedTypoCount + action.payload);
-            // Update user data in storage
             const userData = storage.getItem<any>('horror_game_user_data') || {};
             storage.setItem('horror_game_user_data', {
                 ...userData,
@@ -180,7 +173,6 @@ const vocabularySlice = createSlice({
     }
 });
 
-// Memoized computed selector
 export const selectMistakeProgress = createSelector(
     [selectValidatedTypoCount],
     (typoCount) => ({
@@ -197,10 +189,9 @@ export const {
     updateTypoCount
 } = vocabularySlice.actions;
 
-// Add specific action for updating progress flags
 export const setProgressFlags = createAction<Record<ProgressFlag, boolean>>('vocabulary/setProgressFlags');
 
-// Thunk for adding new words during gameplay
+// Thunk for adding new words
 export const addNewWord = (word: string) =>
     async (dispatch: AppDispatch, getState: () => RootState) => {
         const state = getState();
@@ -211,7 +202,7 @@ export const addNewWord = (word: string) =>
 
             try {
                 dispatch(addWord(wordLower));
-                dispatchWordDiscoveredEvent([wordLower]);
+                dispatchWordEvent('wordDiscovered', [wordLower]);
 
                 const variations = await dispatch(getWordVariations(wordLower)).unwrap();
 
@@ -224,7 +215,7 @@ export const addNewWord = (word: string) =>
 
                     if (newVariations.length > 0) {
                         dispatch(addWords(newVariations));
-                        dispatchWordDiscoveredEvent(newVariations);
+                        dispatchWordEvent('wordDiscovered', newVariations);
                     }
                 }
 
@@ -304,38 +295,11 @@ export const forgetWords = (words: string[]) =>
                 timestamp: new Date().toISOString()
             });
 
-            // Trigger animation
-            dispatchWordForgottenEvent(wordsToForget);
-
-            // Remove words and update state
+            // First remove the words
             dispatch(removeWords(wordsToForget));
 
-            GameLogger.logGameState({
-                type: 'Memory Recovery',
-                action: 'Pre-Event Dispatch',
-                wordsToForget,
-                currentState: {
-                    forgottenWords: getState().vocabulary.forgottenWords,
-                    currentTarget: getState().memoryRecovery.targetWords
-                }
-            });
-
-            // Try both document and window
-            const event = new CustomEvent('wordForgotten', {
-                detail: { words: wordsToForget },
-                bubbles: true,
-                composed: true
-            });
-
-            document.dispatchEvent(event);
-            window.dispatchEvent(event);
-
-            GameLogger.logGameState({
-                type: 'Memory Recovery',
-                action: 'Post-Event Dispatch',
-                eventDispatched: true,
-                words: wordsToForget
-            });
+            // Then dispatch the event once
+            dispatchWordEvent('wordForgotten', wordsToForget);
 
             if (validTypoCount > 0) {
                 dispatch(updateTypoCount(validTypoCount));
@@ -364,6 +328,7 @@ export const forgetWords = (words: string[]) =>
                     validatedTypoCount: newState.vocabulary.validatedTypoCount,
                     timestamp: new Date().toISOString()
                 });
+
                 const currentFlags = newState.game.currentUser?.progressFlags || initializeProgressFlags();
                 dispatch(updateUserState({
                     progressFlags: {
@@ -373,6 +338,7 @@ export const forgetWords = (words: string[]) =>
                 }));
             }
 
+            // Update user data
             const currentUser = loadUser();
             if (currentUser) {
                 const updatedUser = {
@@ -404,25 +370,9 @@ export const forgetWords = (words: string[]) =>
                 }
             });
 
-            // In case of error, proceed with deletion but don't increment typo count
+            // In case of error, still remove words and dispatch event
             dispatch(removeWords(wordsToForget));
-
-            const dispatchWordForgottenEvent = (words: string[]) => {
-                GameLogger.logGameState({
-                    type: 'Memory Recovery',
-                    action: 'Dispatching Forgotten Event',
-                    words
-                });
-
-                const event = new CustomEvent('wordForgotten', {
-                    detail: { words },
-                    bubbles: true
-                });
-                window.dispatchEvent(event);
-            };
-
-            dispatchWordForgottenEvent(wordsToForget);
-
+            dispatchWordEvent('wordForgotten', wordsToForget);
         }
     };
 

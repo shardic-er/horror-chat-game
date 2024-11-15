@@ -1,5 +1,3 @@
-// src/store/slices/memoryRecoverySlice.ts
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getApiKey } from '../../services/apiKeyService';
 import { LLMClient } from '../../services/llmClient';
@@ -12,6 +10,7 @@ export interface TargetWord {
     word: string;
     recovered: boolean;
     essay?: string;
+    isGeneratingEssay?: boolean;
 }
 
 interface MemoryRecoveryState {
@@ -73,12 +72,16 @@ export const forgetAndRecover = createAsyncThunk<
             tw.word.toLowerCase() === word.toLowerCase()
         );
 
-        if (!targetWord || targetWord.recovered) {
+        if (!targetWord || targetWord.recovered || targetWord.isGeneratingEssay) {
             GameLogger.logGameState({
                 type: 'Memory Recovery',
                 action: 'Skipped',
                 word,
-                reason: targetWord ? 'Already recovered' : 'Not a target word'
+                reason: targetWord
+                    ? targetWord.recovered
+                        ? 'Already recovered'
+                        : 'Essay generation in progress'
+                    : 'Not a target word'
             });
             return;
         }
@@ -92,6 +95,9 @@ export const forgetAndRecover = createAsyncThunk<
 
             // First forget the word
             await dispatch(forgetWords([word]));
+
+            // Mark word as being processed
+            dispatch(markWordProcessing({ word, isProcessing: true }));
 
             // Generate the memory essay
             GameLogger.logGameState({
@@ -139,10 +145,13 @@ export const forgetAndRecover = createAsyncThunk<
                 word,
                 error
             });
+            // Make sure to clear processing state even on error
+            dispatch(markWordProcessing({ word, isProcessing: false }));
             throw error;
         }
     }
 );
+
 export const initializeTargetWords = createAsyncThunk(
     'memoryRecovery/initialize',
     async (_, { rejectWithValue }) => {
@@ -168,7 +177,8 @@ export const initializeTargetWords = createAsyncThunk(
             const parsedResponse = JSON.parse(response);
             return parsedResponse.words.map((word: string) => ({
                 word: word.toLowerCase(),
-                recovered: false
+                recovered: false,
+                isGeneratingEssay: false
             }));
         } catch (error) {
             return rejectWithValue((error as Error).message);
@@ -219,6 +229,14 @@ const memoryRecoverySlice = createSlice({
             if (targetWord) {
                 targetWord.recovered = true;
                 targetWord.essay = essay;
+                targetWord.isGeneratingEssay = false;
+            }
+        },
+        markWordProcessing: (state, action) => {
+            const { word, isProcessing } = action.payload;
+            const targetWord = state.targetWords.find(tw => tw.word === word);
+            if (targetWord) {
+                targetWord.isGeneratingEssay = isProcessing;
             }
         },
         setWordVariationsEnabled: (state, action) => {
@@ -250,6 +268,7 @@ const memoryRecoverySlice = createSlice({
 
 export const {
     markWordRecovered,
+    markWordProcessing,
     setWordVariationsEnabled,
     resetMemoryRecovery
 } = memoryRecoverySlice.actions;

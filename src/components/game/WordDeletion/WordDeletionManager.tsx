@@ -1,5 +1,3 @@
-// src/components/game/WordDeletion/WordDeletionManager.tsx
-
 import React, { useEffect, useState, useCallback } from 'react';
 import WordDeletion from './WordDeletion';
 
@@ -25,6 +23,7 @@ const WordDeletionManager: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        // Only handle visual deletion animation
         document.addEventListener(
             'wordForgotten',
             handleWordForgotten as EventListener
